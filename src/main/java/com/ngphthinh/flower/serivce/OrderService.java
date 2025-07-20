@@ -131,7 +131,7 @@ public class OrderService {
                 .build();
 
         orderRepository.save(order);
-        OrderDetailResponse orderDetailResponse = orderDetailService.createOrderDetails(order, request.getProductName(), request.getPrice());
+        OrderDetailResponse orderDetailResponse = orderDetailService.createOrderDetails(order, request.getProductName(), request.getPrice(), request.getQuantity());
         OrderResponse orderResponse = orderMapper.toOrderResponse(order);
         orderResponse.setOrderDetailResponses(List.of(orderDetailResponse));
         return orderResponse;

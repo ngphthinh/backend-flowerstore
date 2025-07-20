@@ -14,4 +14,5 @@ public class CreateOrderBaseRequest {
     private String productName;
     private double price;
     private String note;
+    private int quantity;
 }

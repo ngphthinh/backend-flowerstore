@@ -75,12 +75,12 @@ public class OrderDetailService {
                 .forEach(imageAsyncService::deleteImage);
     }
 
-    public OrderDetailResponse createOrderDetails(Order order, String productName, double price) {
+    public OrderDetailResponse createOrderDetails(Order order, String productName, double price, int quantity) {
         OrderDetail orderDetail = OrderDetail.builder()
                 .productName(productName)
                 .price(price)
-                .quantity(1)
-                .subtotal(price)
+                .quantity(quantity)
+                .subtotal(price * quantity)
                 .productImage(null)
                 .order(order)
                 .build();

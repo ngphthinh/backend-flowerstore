@@ -37,8 +37,7 @@ public class StoreService {
 
     public StoreResponse updateStore(Long id, StoreRequest request) {
         Store store = getStoreEntityById(id);
-        store.setName(request.getName());
-        store.setAddress(request.getAddress());
+        storeMapper.updateStoreFormRequest(request, store);
         return storeMapper.toStoreResponse(storeRepository.save(store));
     }
 
@@ -48,7 +47,7 @@ public class StoreService {
         return storeMapper.toStoreResponse(store);
     }
 
-    public Store getStoreEntityById(Long id){
+    public Store getStoreEntityById(Long id) {
         return storeRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
     }

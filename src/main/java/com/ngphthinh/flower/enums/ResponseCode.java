@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ResponseCode {
-    CREATE_ORDER_SUCCESS(201, "Order created successfully"),
+    CREATE_ORDER(201, "Order created successfully"),
     GET_ORDER_LIST(200, "Order list retrieved successfully"),
     GET_ORDER(200, "Order retrieved successfully"),
     DELETE_ORDER(200, "Order deleted successfully"),
@@ -14,6 +14,14 @@ public enum ResponseCode {
     CREATE_STORE(200, "Store created successfully"),
     DELETE_STORE(200, "Store deleted successfully"),
     UPDATE_STORE(200, "Store updated successfully"),
+
+
+    CREATE_EXPENSE(201, "Expense created successfully"),
+    GET_EXPENSE_LIST(200, "Expense list retrieved successfully"),
+    GET_EXPENSE(200, "Expense retrieved successfully"),
+    DELETE_EXPENSE(200, "Expense deleted successfully"),
+    UPDATE_EXPENSE(200, "Expense updated successfully")
+
     ;
 
 

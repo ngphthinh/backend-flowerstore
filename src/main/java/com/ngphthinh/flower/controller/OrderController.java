@@ -29,8 +29,8 @@ public class OrderController {
             @RequestPart("imageIndexes") String imageIndexes
     ) {
         return ApiResponse.<OrderResponse>builder()
-                .code(ResponseCode.CREATE_ORDER_SUCCESS.getCode())
-                .message(ResponseCode.CREATE_ORDER_SUCCESS.getMessage())
+                .code(ResponseCode.CREATE_ORDER.getCode())
+                .message(ResponseCode.CREATE_ORDER.getMessage())
                 .data(orderService.createOrder(jsonOrder, jsonOrderDetail, images, imageIndexes))
                 .build();
     }
@@ -72,10 +72,10 @@ public class OrderController {
     }
 
     @PostMapping("/product")
-    public ApiResponse<OrderResponse> createOrders(@RequestBody CreateOrderBaseRequest request) {
+    public ApiResponse<OrderResponse> createOrder(@RequestBody CreateOrderBaseRequest request) {
         return ApiResponse.<OrderResponse>builder()
-                .code(ResponseCode.CREATE_ORDER_SUCCESS.getCode())
-                .message(ResponseCode.CREATE_ORDER_SUCCESS.getMessage())
+                .code(ResponseCode.CREATE_ORDER.getCode())
+                .message(ResponseCode.CREATE_ORDER.getMessage())
                 .data(orderService.createOrder(request))
                 .build();
     }

@@ -20,7 +20,8 @@ public enum ResponseCode {
     GET_EXPENSE_LIST(200, "Expense list retrieved successfully"),
     GET_EXPENSE(200, "Expense retrieved successfully"),
     DELETE_EXPENSE(200, "Expense deleted successfully"),
-    UPDATE_EXPENSE(200, "Expense updated successfully")
+    UPDATE_EXPENSE(200, "Expense updated successfully"),
+    GET_TOTAL_EXPENSE(200, "Total expense retrieved successfully")
 
     ;
 

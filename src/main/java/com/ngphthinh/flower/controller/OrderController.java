@@ -1,13 +1,18 @@
 package com.ngphthinh.flower.controller;
 
 import com.ngphthinh.flower.dto.request.CreateOrderBaseRequest;
+import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.OrderResponse;
+import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.OrderService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -77,6 +82,24 @@ public class OrderController {
                 .code(ResponseCode.CREATE_ORDER.getCode())
                 .message(ResponseCode.CREATE_ORDER.getMessage())
                 .data(orderService.createOrder(request))
+                .build();
+    }
+
+    @GetMapping("/total")
+    public ApiResponse<TotalPriceOrderResponse> getTotalPriceByBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+        return ApiResponse.<TotalPriceOrderResponse>builder()
+                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
+                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+                .data(orderService.getTotalPriceBetweenDates(dateRangeRequest))
+                .build();
+    }
+
+    @GetMapping("/date")
+    public ApiResponse<List<OrderResponse>> getOrderByBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+        return ApiResponse.<List<OrderResponse>>builder()
+                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
+                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+                .data(orderService.getOrderByDate(dateRangeRequest))
                 .build();
     }
 }

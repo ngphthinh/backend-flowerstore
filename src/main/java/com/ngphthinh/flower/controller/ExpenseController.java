@@ -1,8 +1,10 @@
 package com.ngphthinh.flower.controller;
 
+import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.ExpenseResponse;
+import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.ExpenseService;
 import org.springframework.web.bind.annotation.*;
@@ -64,5 +66,22 @@ public class ExpenseController {
                 .build();
     }
 
+    @GetMapping("/total")
+    public ApiResponse<TotalAmountExpenseResponse> getTotalExpenseBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+        return ApiResponse.<TotalAmountExpenseResponse>builder()
+                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
+                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+                .data(expenseService.getTotalAmountExpenseBetweenDates(dateRangeRequest))
+                .build();
+    }
+
+    @GetMapping("/date")
+    public ApiResponse<List<ExpenseResponse>> getExpenseBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+        return ApiResponse.<List<ExpenseResponse>>builder()
+                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
+                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+                .data(expenseService.getExpenseBetweenDates(dateRangeRequest))
+                .build();
+    }
 
 }

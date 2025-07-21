@@ -1,7 +1,9 @@
 package com.ngphthinh.flower.serivce;
 
+import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.response.ExpenseResponse;
+import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
 import com.ngphthinh.flower.entity.Expense;
 import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
@@ -9,6 +11,9 @@ import com.ngphthinh.flower.mapper.ExpenseMapper;
 import com.ngphthinh.flower.repo.ExpenseRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -56,5 +61,27 @@ public class ExpenseService {
     public Expense getExpenseByIdEntity(Long id) {
         return expenseRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.EXPENSE_NOT_FOUND));
+    }
+
+    public TotalAmountExpenseResponse getTotalAmountExpenseBetweenDates(DateRangeRequest dateRangeRequest) {
+        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
+        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+        BigDecimal totalAmountExpense = expenseRepository.sumAmountByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
+        return TotalAmountExpenseResponse.builder()
+                .totalAmount(totalAmountExpense)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+    }
+
+    public List<ExpenseResponse> getExpenseBetweenDates(DateRangeRequest dateRangeRequest) {
+        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
+        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+
+        return expenseRepository.findExpensesByDateBetween(startDate, endDate)
+                .stream()
+                .map(expenseMapper::toExpenseResponse)
+                .toList();
+
     }
 }

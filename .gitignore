@@ -34,3 +34,4 @@ build/
 
 ### Secret files ###
 /src/main/resources/application-secret.properties
+/src/main/resources/static/script.sql

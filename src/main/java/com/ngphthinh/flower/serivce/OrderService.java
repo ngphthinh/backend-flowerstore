@@ -3,8 +3,10 @@ package com.ngphthinh.flower.serivce;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ngphthinh.flower.dto.request.CreateOrderBaseRequest;
 import com.ngphthinh.flower.dto.request.CreateOrderRequest;
+import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.response.OrderDetailResponse;
 import com.ngphthinh.flower.dto.response.OrderResponse;
+import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
 import com.ngphthinh.flower.entity.Order;
 import com.ngphthinh.flower.entity.Store;
 import com.ngphthinh.flower.enums.DeliveryMethod;
@@ -16,9 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -135,5 +141,26 @@ public class OrderService {
         OrderResponse orderResponse = orderMapper.toOrderResponse(order);
         orderResponse.setOrderDetailResponses(List.of(orderDetailResponse));
         return orderResponse;
+    }
+
+    public TotalPriceOrderResponse getTotalPriceBetweenDates(DateRangeRequest dateRangeRequest) {
+        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
+        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+        BigDecimal totalPriceByDateBetween = orderRepository.sumTotalPriceByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
+        return TotalPriceOrderResponse.builder()
+                .totalAmount(totalPriceByDateBetween)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+    }
+
+    public List<OrderResponse> getOrderByDate(DateRangeRequest dateRangeRequest) {
+        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
+        LocalDateTime enDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+
+        return orderRepository.findOrdersByOrderDateBetween(startDate, enDate)
+                .stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
     }
 }

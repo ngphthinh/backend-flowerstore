@@ -9,9 +9,11 @@ import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.OrderService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -85,7 +87,7 @@ public class OrderController {
     }
 
     @GetMapping("/total")
-    public ApiResponse<TotalPriceOrderResponse> getTotalPriceByBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+    public ApiResponse<TotalPriceOrderResponse> getTotalPriceByBetweenDates(@Valid @RequestBody DateRangeRequest dateRangeRequest) {
         return ApiResponse.<TotalPriceOrderResponse>builder()
                 .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
                 .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
@@ -94,11 +96,11 @@ public class OrderController {
     }
 
     @GetMapping("/date")
-    public ApiResponse<PagingResponse<OrderResponse>> getOrderByBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+    public ApiResponse<PagingResponse<OrderResponse>> getOrderByBetweenDates(@Valid @RequestBody DateRangeRequest dateRangeRequest) {
         return ApiResponse.<PagingResponse<OrderResponse>>builder()
                 .code(ResponseCode.GET_ORDER_BETWEEN_DATE.getCode())
                 .message(ResponseCode.GET_ORDER_BETWEEN_DATE.getMessage())
-                .data(orderService.getOrderByDate(dateRangeRequest))
+                .data(orderService.getOrderByBetweenDates(dateRangeRequest))
                 .build();
     }
 
@@ -113,4 +115,38 @@ public class OrderController {
                 .data(orderService.getAllOrderWithPaginate(page, size))
                 .build();
     }
+
+    @GetMapping("/total/date")
+    public ApiResponse<TotalPriceOrderResponse> getTotalPriceByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ApiResponse.<TotalPriceOrderResponse>builder()
+                .code(ResponseCode.GET_TOTAL_ORDER_DATE.getCode())
+                .message(ResponseCode.GET_TOTAL_ORDER_DATE.getMessage())
+                .data(orderService.getTotalPriceByDate(date))
+                .build();
+    }
+
+    @GetMapping("/total/store/dates")
+    public ApiResponse<TotalPriceOrderResponse> getTotalPriceByStoreIdAndDateBetween(
+            @RequestParam("storeId") Long storeId,
+            @Valid @RequestBody DateRangeRequest dateRangeRequest
+    ) {
+        return ApiResponse.<TotalPriceOrderResponse>builder()
+                .code(ResponseCode.GET_TOTAL_ORDER_DATE.getCode())
+                .message(ResponseCode.GET_TOTAL_ORDER_DATE.getMessage())
+                .data(orderService.getTotalPriceByStoreIdAndDateRange(storeId, dateRangeRequest))
+                .build();
+    }
+
+    @GetMapping("/total/store/date")
+    public ApiResponse<TotalPriceOrderResponse> getTotalPriceByStoreIdAndDate(
+            @RequestParam("storeId") Long storeId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return ApiResponse.<TotalPriceOrderResponse>builder()
+                .code(ResponseCode.GET_TOTAL_ORDER_DATE.getCode())
+                .message(ResponseCode.GET_TOTAL_ORDER_DATE.getMessage())
+                .data(orderService.getTotalPriceByStoreIdAndDate(storeId, date))
+                .build();
+    }
+
 }

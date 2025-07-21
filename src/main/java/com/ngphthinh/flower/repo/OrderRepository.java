@@ -17,4 +17,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<BigDecimal> sumTotalPriceByDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     Page<Order> findOrdersByOrderDateBetween(LocalDateTime orderDateAfter, LocalDateTime orderDateBefore, Pageable pageable);
+
+    Page<Order> findAllByStoreIdAndOrderDateBetween(Long storeId, LocalDateTime orderDateAfter, LocalDateTime orderDateBefore, Pageable pageable);
+
+    @Query("SELECT SUM(o.totalPrice) FROM Order o WHERE o.store.id = :storeId AND o.orderDate BETWEEN :startDate AND :endDate")
+    Optional<BigDecimal> sumTotalPriceByStoreIdAndOrderDateBetween(Long storeId, LocalDateTime startDate, LocalDateTime endDate);
+
+    Optional<Integer> countOrderByOrderDateBetweenAndStoreId(LocalDateTime orderDateAfter, LocalDateTime orderDateBefore, Long storeId);
+
+    Optional<Integer> countOrderByOrderDateBetween(LocalDateTime orderDateAfter, LocalDateTime orderDateBefore);
 }

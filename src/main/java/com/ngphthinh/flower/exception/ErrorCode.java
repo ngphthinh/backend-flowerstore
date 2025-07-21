@@ -18,7 +18,7 @@ public enum ErrorCode {
     INVALID_DATE_FORMAT(1007, "Invalid date format. Please use yyyy-MM-dd", HttpStatus.BAD_REQUEST),
     INVALID_PAGINATION(1008, "Invalid pagination parameters. Page number and size must be greater than 0", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(1009, "Order not found by id {id}", HttpStatus.BAD_REQUEST),
-    INVALID_DATE_RANGE(1010, "Invalid date range. Start date must be before end date", HttpStatus.BAD_REQUEST),
+    INVALID_DATE_RANGE(1010, "Start date must be before end date", HttpStatus.BAD_REQUEST),
     STORE_ID_NULL(1011, "Store id must not be null", HttpStatus.BAD_REQUEST),
     MISSING_REQUEST_PART(1012, "Please provide the required part", HttpStatus.BAD_REQUEST),
 
@@ -38,7 +38,15 @@ public enum ErrorCode {
 
     INVALID_CUSTOMER_NAME(1310, "Customer name must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_DELIVERY_METHOD(1311, "Delivery method doesn't exist", HttpStatus.BAD_REQUEST),
-    INVALID_ORDER_DATE(1312, "Order date must not be in the future", HttpStatus.BAD_REQUEST);
+    INVALID_ORDER_DATE(1312, "Order date must not be in the future", HttpStatus.BAD_REQUEST),
+
+    INVALID_START_DATE(1313, "Start date cannot be in the future and cannot be null", HttpStatus.BAD_REQUEST),
+    INVALID_END_DATE(1314, "End date cannot be null", HttpStatus.BAD_REQUEST),
+    INVALID_PAGE_SIZE(1314, "Page size must be greater than {min}", HttpStatus.BAD_REQUEST),
+    INVALID_PAGE(1315, "Page must be greater than {min}", HttpStatus.BAD_REQUEST),
+
+
+    ;
 
 
     private final int code;

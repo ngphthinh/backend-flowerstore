@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class OrderService {
     }
 
     public OrderResponse getOrderById(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND,"id", id.toString()));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "id", id.toString()));
         List<OrderDetailResponse> orderDetailResponses = orderDetailService.getOrderDetailsByOrderId(id);
 
         var orderResponse = orderMapper.toOrderResponse(order);
@@ -180,7 +181,22 @@ public class OrderService {
                 .build();
     }
 
-    public PagingResponse<OrderResponse> getOrderByDate(DateRangeRequest dateRangeRequest) {
+    public TotalPriceOrderResponse getTotalPriceByDate(LocalDate date) {
+        LocalDateTime startDate = date.atStartOfDay();
+        LocalDateTime endDate = date.atTime(LocalTime.MAX);
+
+        BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
+                .sumTotalPriceByDateBetween(startDate, endDate)
+                .orElse(BigDecimal.ZERO);
+
+        return TotalPriceOrderResponse.builder()
+                .totalAmount(totalPriceByStoreIdAndOrderDateBetween)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+    }
+
+    public PagingResponse<OrderResponse> getOrderByBetweenDates(DateRangeRequest dateRangeRequest) {
         LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
         LocalDateTime enDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
 
@@ -212,6 +228,9 @@ public class OrderService {
                 .build();
     }
 
+
+
+
     public PagingResponse<OrderResponse> getAllOrderWithPaginate(int page, int size) {
         if (page < 1 || size < 1) {
             throw new AppException(ErrorCode.INVALID_PAGINATION);
@@ -233,6 +252,48 @@ public class OrderService {
                 .totalPages(orderPage.getTotalPages())
                 .page(page)
                 .page(size)
+                .build();
+    }
+
+    public TotalPriceOrderResponse getTotalPriceByStoreIdAndDateRange(Long storeId, DateRangeRequest dateRangeRequest) {
+        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
+        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+
+        if (startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
+        if (storeId == null || !storeService.isStoreExist(storeId)) {
+            throw new AppException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
+                .sumTotalPriceByStoreIdAndOrderDateBetween(storeId, startDate, endDate)
+                .orElse(BigDecimal.ZERO);
+
+        return TotalPriceOrderResponse.builder()
+                .totalAmount(totalPriceByStoreIdAndOrderDateBetween)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+    }
+
+    public TotalPriceOrderResponse getTotalPriceByStoreIdAndDate(Long storeId, LocalDate date) {
+
+        LocalDateTime startDate = date.atStartOfDay();
+        LocalDateTime endDate = date.atTime(LocalTime.MAX);
+        if (storeId == null || !storeService.isStoreExist(storeId)) {
+            throw new AppException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
+                .sumTotalPriceByStoreIdAndOrderDateBetween(storeId, startDate, endDate)
+                .orElse(BigDecimal.ZERO);
+
+        return TotalPriceOrderResponse.builder()
+                .totalAmount(totalPriceByStoreIdAndOrderDateBetween)
+                .startDate(startDate)
+                .endDate(endDate)
                 .build();
     }
 }

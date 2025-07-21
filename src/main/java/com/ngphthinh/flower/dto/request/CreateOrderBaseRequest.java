@@ -2,7 +2,6 @@ package com.ngphthinh.flower.dto.request;
 
 import com.ngphthinh.flower.validator.MinValue;
 import com.ngphthinh.flower.validator.ValidMoney;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

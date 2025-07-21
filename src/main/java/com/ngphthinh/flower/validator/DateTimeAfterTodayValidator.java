@@ -3,9 +3,9 @@ package com.ngphthinh.flower.validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-public class DateAfterTodayValidator implements ConstraintValidator<ValidDateAfterToday, LocalDate> {
+public class DateTimeAfterTodayValidator implements ConstraintValidator<ValidDateAfterToday, LocalDateTime> {
 
     @Override
     public void initialize(ValidDateAfterToday constraintAnnotation) {
@@ -13,11 +13,11 @@ public class DateAfterTodayValidator implements ConstraintValidator<ValidDateAft
     }
 
     @Override
-    public boolean isValid(LocalDate localDate, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(LocalDateTime localDateTime, ConstraintValidatorContext constraintValidatorContext) {
         // Null values are considered valid and will be handled by @NotNull or similar annotations.
-        if (localDate == null)
+        if (localDateTime == null)
             return true;
-        LocalDate today = LocalDate.now();
-        return localDate.isBefore(today);
+        LocalDateTime today = LocalDateTime.now();
+        return localDateTime.isBefore(today);
     }
 }

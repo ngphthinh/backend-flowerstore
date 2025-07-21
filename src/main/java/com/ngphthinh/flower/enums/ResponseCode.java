@@ -10,6 +10,8 @@ public enum ResponseCode {
     GET_ORDER(200, "Order retrieved successfully"),
     DELETE_ORDER(200, "Order deleted successfully"),
     GET_ORDER_BETWEEN_DATE(200, "Order list retrieved successfully between dates"),
+    GET_TOTAL_ORDER_DATE(200, "Total order retrieved successfully by date"),
+
 
     GET_STORE(200, "Store retrieved successfully"),
     GET_STORE_LIST(200, "Store list retrieved successfully"),

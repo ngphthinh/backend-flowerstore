@@ -54,4 +54,8 @@ public class StoreService {
         return storeRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND, "id", id.toString()));
     }
+
+    public boolean isStoreExist(Long id) {
+        return storeRepository.existsById(id);
+    }
 }

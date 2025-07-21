@@ -5,6 +5,7 @@ import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.StoreResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.StoreService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class StoreController {
     }
 
     @PostMapping
-    public ApiResponse<StoreResponse> createStore(@RequestBody StoreRequest request) {
+    public ApiResponse<StoreResponse> createStore(@Valid @RequestBody StoreRequest request) {
         return ApiResponse.<StoreResponse>builder()
                 .code(ResponseCode.CREATE_STORE.getCode())
                 .message(ResponseCode.CREATE_STORE.getMessage())
@@ -57,7 +58,7 @@ public class StoreController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<StoreResponse> updateStore(@PathVariable("id") Long id, @RequestBody StoreRequest request) {
+    public ApiResponse<StoreResponse> updateStore(@PathVariable("id") Long id, @Valid @RequestBody StoreRequest request) {
         return ApiResponse.<StoreResponse>builder()
                 .code(ResponseCode.UPDATE_STORE.getCode())
                 .message(ResponseCode.UPDATE_STORE.getMessage())

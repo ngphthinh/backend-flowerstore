@@ -10,11 +10,15 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.OrderDetailMapper;
 import com.ngphthinh.flower.repo.OrderDetailRepository;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OrderDetailService {
@@ -23,13 +27,16 @@ public class OrderDetailService {
 
     private final OrderDetailRepository orderDetailRepository;
 
+    private final Validator validator;
+
     private final OrderDetailMapper orderDetailMapper;
 
     private final ImageAsyncService imageAsyncService;
 
-    public OrderDetailService(ObjectMapper objectMapper, OrderDetailRepository orderDetailRepository, OrderDetailMapper orderDetailMapper, ImageAsyncService imageAsyncService) {
+    public OrderDetailService(ObjectMapper objectMapper, OrderDetailRepository orderDetailRepository, Validator validator, OrderDetailMapper orderDetailMapper, ImageAsyncService imageAsyncService) {
         this.objectMapper = objectMapper;
         this.orderDetailRepository = orderDetailRepository;
+        this.validator = validator;
         this.orderDetailMapper = orderDetailMapper;
         this.imageAsyncService = imageAsyncService;
     }
@@ -38,6 +45,9 @@ public class OrderDetailService {
         try {
             List<CreateOrderDetailRequest> orderDetailRequests = objectMapper.readValue(jsonOrderDetailRequests,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, CreateOrderDetailRequest.class));
+
+            // Validate each request
+            orderDetailRequests.forEach(this::validateRequest);
 
             List<OrderDetail> orderDetails = new ArrayList<>();
 
@@ -59,6 +69,25 @@ public class OrderDetailService {
         } catch (IOException e) {
             throw new AppException(ErrorCode.MAPPER_ERROR);
         }
+    }
+
+    private void validateRequest(CreateOrderDetailRequest createOrderDetailRequest) {
+        Set<ConstraintViolation<CreateOrderDetailRequest>> violations = validator.validate(createOrderDetailRequest);
+
+        if (!violations.isEmpty()) {
+            String message = violations.iterator().next().getMessage();
+            // If the message contains "min", it means the quantity is less than 1
+            var attribute = violations.iterator().next().getConstraintDescriptor().getAttributes();
+
+            String keyAttribute = "min";
+
+            if (attribute.containsKey(keyAttribute)) {
+
+                throw new AppException(ErrorCode.valueOf(message), keyAttribute, String.valueOf(attribute.get(keyAttribute)));
+            }
+            throw new AppException(ErrorCode.valueOf(message));
+        }
+
     }
 
     public List<OrderDetailResponse> getOrderDetailsByOrderId(Long orderId) {

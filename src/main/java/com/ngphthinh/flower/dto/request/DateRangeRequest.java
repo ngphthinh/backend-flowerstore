@@ -1,4 +1,5 @@
 package com.ngphthinh.flower.dto.request;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,4 +14,6 @@ import java.time.LocalDate;
 public class DateRangeRequest {
     private LocalDate startDate;
     private LocalDate endDate;
+    private int page;
+    private int size;
 }

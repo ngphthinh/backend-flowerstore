@@ -26,9 +26,8 @@ public class ImageAsyncService {
 
     @Async
     public void uploadImageForProduct(byte[] imageBytes, Long orderDetailId) {
-        log.info("Order detail id: {}", orderDetailId);
         OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND, "id", orderDetailId.toString()));
 
         ProductImage productImage = productImageService.saveProductImage(imageBytes, orderDetail.getProductName());
 

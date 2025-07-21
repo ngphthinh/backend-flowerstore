@@ -1,18 +1,13 @@
 package com.ngphthinh.flower;
 
+import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.entity.Expense;
 import com.ngphthinh.flower.repo.ExpenseRepository;
 import com.ngphthinh.flower.repo.OrderRepository;
+import com.ngphthinh.flower.serivce.ExpenseService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
@@ -24,21 +19,22 @@ class BackendFlowerShopApplicationTests {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    ExpenseService expenseService;
+
     @Test
     void contextLoads() {
 
-        LocalDateTime startDate = LocalDateTime.of(2025, 6, 1, 0, 0, 0);
-        LocalDateTime endDateTime = LocalDateTime.now();
-
-        LocalDateTime dateTest = LocalDateTime.of(2025,7,14, 15, 30, 0);
-
-        LocalDate date = LocalDate.of(2025,7,14);
-
-        var orderDate = orderRepository.findByOrderDate(date);
-
-        orderDate.forEach(order -> System.out.println(order.getCustomerName()));
+        var page = expenseService.getAllExpenseWithPaginate(1, 5);
 
 
+        System.out.println(PagingResponse.<Expense>builder()
+                .page(1)
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+//                .content(page.getContent())
+                .size(5)
+                .build());
     }
 
 }

@@ -48,7 +48,10 @@ public class StoreService {
     }
 
     public Store getStoreEntityById(Long id) {
+        if (id == null) {
+            throw new AppException(ErrorCode.STORE_ID_NULL);
+        }
         return storeRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND, "id", id.toString()));
     }
 }

@@ -6,6 +6,7 @@ import com.ngphthinh.flower.dto.request.CreateOrderRequest;
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.response.OrderDetailResponse;
 import com.ngphthinh.flower.dto.response.OrderResponse;
+import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
 import com.ngphthinh.flower.entity.Order;
 import com.ngphthinh.flower.entity.Store;
@@ -14,22 +15,28 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.OrderMapper;
 import com.ngphthinh.flower.repo.OrderRepository;
+import jakarta.validation.ConstraintViolation;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import jakarta.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class OrderService {
 
     private final StoreService storeService;
+
+    private final Validator validator;
 
     private final OrderRepository orderRepository;
 
@@ -39,8 +46,9 @@ public class OrderService {
 
     private final OrderDetailService orderDetailService;
 
-    public OrderService(StoreService storeService, OrderRepository orderRepository, ObjectMapper objectMapper, OrderMapper orderMapper, OrderDetailService orderDetailService) {
+    public OrderService(StoreService storeService, Validator validator, OrderRepository orderRepository, ObjectMapper objectMapper, OrderMapper orderMapper, OrderDetailService orderDetailService) {
         this.storeService = storeService;
+        this.validator = validator;
         this.orderRepository = orderRepository;
         this.objectMapper = objectMapper;
         this.orderMapper = orderMapper;
@@ -50,10 +58,15 @@ public class OrderService {
     public OrderResponse createOrder(String jsonOrder, String jsonOrderDetail, List<MultipartFile> images, String jsonArrayImgIndexes) {
         try {
             // Convert data raw
-            List<byte[]> imagesBytes = buildImageBytes(images);
-            List<Integer> imageIndexes = objectMapper
-                    .readValue(jsonArrayImgIndexes, objectMapper.getTypeFactory().constructCollectionType(List.class, Integer.class));
+
+            List<byte[]> imagesBytes = images != null ? buildImageBytes(images) : new ArrayList<>();
+
+            List<Integer> imageIndexes = (jsonArrayImgIndexes != null) ? objectMapper
+                    .readValue(jsonArrayImgIndexes, objectMapper.getTypeFactory().constructCollectionType(List.class, Integer.class)) : new ArrayList<>();
+
             CreateOrderRequest orderRequest = objectMapper.readValue(jsonOrder, CreateOrderRequest.class);
+
+            validateRequest(orderRequest);
 
             // Create and save temporary order
             Order order = orderMapper.toOrder(orderRequest);
@@ -78,8 +91,16 @@ public class OrderService {
         }
     }
 
+    private void validateRequest(CreateOrderRequest createOrderRequest) {
+        Set<ConstraintViolation<CreateOrderRequest>> violations = validator.validate(createOrderRequest);
+        if (!violations.isEmpty()) {
+            String message = violations.iterator().next().getMessage();
+            throw new AppException(ErrorCode.valueOf(message));
+        }
+    }
+
     public OrderResponse getOrderById(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(RuntimeException::new);
+        Order order = orderRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND,"id", id.toString()));
         List<OrderDetailResponse> orderDetailResponses = orderDetailService.getOrderDetailsByOrderId(id);
 
         var orderResponse = orderMapper.toOrderResponse(order);
@@ -146,6 +167,11 @@ public class OrderService {
     public TotalPriceOrderResponse getTotalPriceBetweenDates(DateRangeRequest dateRangeRequest) {
         LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
         LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+
+        if (startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
         BigDecimal totalPriceByDateBetween = orderRepository.sumTotalPriceByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
         return TotalPriceOrderResponse.builder()
                 .totalAmount(totalPriceByDateBetween)
@@ -154,13 +180,59 @@ public class OrderService {
                 .build();
     }
 
-    public List<OrderResponse> getOrderByDate(DateRangeRequest dateRangeRequest) {
+    public PagingResponse<OrderResponse> getOrderByDate(DateRangeRequest dateRangeRequest) {
         LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
         LocalDateTime enDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
 
-        return orderRepository.findOrdersByOrderDateBetween(startDate, enDate)
-                .stream()
+        int size = dateRangeRequest.getSize();
+        int page = dateRangeRequest.getPage();
+
+        if (size < 1 || page < 1) {
+            throw new AppException(ErrorCode.INVALID_PAGINATION);
+        }
+
+        if (startDate.isAfter(enDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("orderDate").descending());
+
+        var orderPage = orderRepository.findOrdersByOrderDateBetween(startDate, enDate, pageable);
+
+        List<OrderResponse> orderResponses = orderPage.getContent().stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();
+
+        return PagingResponse.<OrderResponse>builder()
+                .content(orderResponses)
+                .totalPages(orderPage.getTotalPages())
+                .totalElements(orderPage.getTotalElements())
+                .page(page)
+                .size(size)
+                .build();
+    }
+
+    public PagingResponse<OrderResponse> getAllOrderWithPaginate(int page, int size) {
+        if (page < 1 || size < 1) {
+            throw new AppException(ErrorCode.INVALID_PAGINATION);
+        }
+
+        int pageRaw = page - 1;
+
+        Pageable pageable = PageRequest.of(pageRaw, size, Sort.by("orderDate").descending());
+
+        var orderPage = orderRepository.findAll(pageable);
+
+        List<OrderResponse> orderResponses = orderPage.getContent().stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+
+        return PagingResponse.<OrderResponse>builder()
+                .content(orderResponses)
+                .totalElements(orderPage.getTotalElements())
+                .totalPages(orderPage.getTotalPages())
+                .page(page)
+                .page(size)
+                .build();
     }
 }

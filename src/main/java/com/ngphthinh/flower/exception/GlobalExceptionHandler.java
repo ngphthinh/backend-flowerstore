@@ -1,31 +1,62 @@
 package com.ngphthinh.flower.exception;
 
 import com.ngphthinh.flower.dto.response.ApiResponse;
+import jakarta.validation.ConstraintViolation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+
+    private static final String MIN_ATTRIBUTE = "min";
+    private static final String ID_ATTRIBUTE = "id";
+    private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
         ApiResponse<Void> apiResponse = new ApiResponse<>();
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage() + ": " + e.getMessage());
-        e.printStackTrace();
+        log.error(e.getMessage());
         return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(value = AppException.class)
     public ResponseEntity<ApiResponse<Void>> handleAppException(AppException e) {
+
+        String message = e.getErrorCode().getMessage();
+
+        if (Objects.nonNull(e.getKeyAttribute()) && Objects.nonNull(e.getAttributeValue())) {
+            if (e.getKeyAttribute().equals(ID_ATTRIBUTE)) {
+                message = mapAttributeId(e.getErrorCode().getMessage(), e.getAttributeValue());
+            }
+            if (e.getKeyAttribute().equals(MIN_ATTRIBUTE)) {
+                message = mapAttribute(e.getErrorCode().getMessage(), e.getAttributeValue());
+            }
+        }
+
         ApiResponse<Void> apiResponse = new ApiResponse<>();
         apiResponse.setCode(e.getErrorCode().getCode());
-        apiResponse.setMessage(e.getErrorCode().getMessage());
+        apiResponse.setMessage(message);
         return ResponseEntity.status(e.getErrorCode().getStatusCode()).body(apiResponse);
+    }
+
+    private String mapAttributeId(String message, String id) {
+        if (message.contains("{" + ID_ATTRIBUTE + "}")) {
+            return message.replace("{" + ID_ATTRIBUTE + "}", id);
+        }
+        return message;
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -42,5 +73,47 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
 
+        var fieldError = e.getFieldError();
+
+        if (fieldError == null) {
+            return ResponseEntity.status(ErrorCode.INVALID_UNCATEGORIZED.getStatusCode()).body(ApiResponse.<Void>builder()
+                    .code(ErrorCode.INVALID_UNCATEGORIZED.getCode())
+                    .message(ErrorCode.INVALID_UNCATEGORIZED.getMessage())
+                    .build());
+        }
+
+        String errorKey = fieldError.getDefaultMessage();
+        ErrorCode errorCode = ErrorCode.valueOf(errorKey);
+
+
+        var constraintViolation = e.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
+
+        var attribute = constraintViolation.getConstraintDescriptor().getAttributes();
+
+        String message = Objects.nonNull(attribute) ? mapAttribute(errorCode.getMessage(), String.valueOf(attribute.get(MIN_ATTRIBUTE))) : errorCode.getMessage();
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.<Void>builder()
+                .code(errorCode.getCode())
+                .message(message)
+                .build());
+    }
+
+    private String mapAttribute(String message, String attributeValue) {
+
+        if (message.contains("{" + MIN_ATTRIBUTE + "}")) {
+            return message.replace("{" + MIN_ATTRIBUTE + "}", attributeValue);
+        }
+        return message;
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    private ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
+        apiResponse.setCode(ErrorCode.MISSING_REQUEST_PART.getCode());
+        apiResponse.setMessage(ErrorCode.MISSING_REQUEST_PART.getMessage() + ": " + e.getRequestPartName());
+        return ResponseEntity.status(ErrorCode.MISSING_REQUEST_PART.getStatusCode()).body(apiResponse);
+    }
 }

@@ -4,15 +4,14 @@ import com.ngphthinh.flower.dto.request.CreateOrderBaseRequest;
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.OrderResponse;
+import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.OrderService;
-import org.springframework.format.annotation.DateTimeFormat;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -30,8 +29,8 @@ public class OrderController {
     public ApiResponse<OrderResponse> createOrder(
             @RequestPart("order") String jsonOrder,
             @RequestPart("orderDetails") String jsonOrderDetail,
-            @RequestPart("images") List<MultipartFile> images,
-            @RequestPart("imageIndexes") String imageIndexes
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "imageIndexes", required = false) String imageIndexes
     ) {
         return ApiResponse.<OrderResponse>builder()
                 .code(ResponseCode.CREATE_ORDER.getCode())
@@ -67,7 +66,7 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public ApiResponse<List<OrderResponse>> getOrders() {
         return ApiResponse.<List<OrderResponse>>builder()
                 .code(ResponseCode.GET_ORDER_LIST.getCode())
@@ -77,7 +76,7 @@ public class OrderController {
     }
 
     @PostMapping("/product")
-    public ApiResponse<OrderResponse> createOrder(@RequestBody CreateOrderBaseRequest request) {
+    public ApiResponse<OrderResponse> createOrder(@Valid @RequestBody CreateOrderBaseRequest request) {
         return ApiResponse.<OrderResponse>builder()
                 .code(ResponseCode.CREATE_ORDER.getCode())
                 .message(ResponseCode.CREATE_ORDER.getMessage())
@@ -95,11 +94,23 @@ public class OrderController {
     }
 
     @GetMapping("/date")
-    public ApiResponse<List<OrderResponse>> getOrderByBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
-        return ApiResponse.<List<OrderResponse>>builder()
-                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
-                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+    public ApiResponse<PagingResponse<OrderResponse>> getOrderByBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+        return ApiResponse.<PagingResponse<OrderResponse>>builder()
+                .code(ResponseCode.GET_ORDER_BETWEEN_DATE.getCode())
+                .message(ResponseCode.GET_ORDER_BETWEEN_DATE.getMessage())
                 .data(orderService.getOrderByDate(dateRangeRequest))
+                .build();
+    }
+
+    @GetMapping("/paginate")
+    public ApiResponse<PagingResponse<OrderResponse>> getOrdersPaginate(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ApiResponse.<PagingResponse<OrderResponse>>builder()
+                .code(ResponseCode.GET_ORDERS_PAGINATE.getCode())
+                .message(ResponseCode.GET_ORDERS_PAGINATE.getMessage())
+                .data(orderService.getAllOrderWithPaginate(page, size))
                 .build();
     }
 }

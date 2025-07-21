@@ -4,9 +4,11 @@ import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.ExpenseResponse;
+import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.ExpenseService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ApiResponse<ExpenseResponse> createExpense(@RequestBody ExpenseRequest expenseRequest) {
+    public ApiResponse<ExpenseResponse> createExpense(@Valid @RequestBody ExpenseRequest expenseRequest) {
         return ApiResponse.<ExpenseResponse>builder()
                 .code(ResponseCode.CREATE_EXPENSE.getCode())
                 .message(ResponseCode.CREATE_EXPENSE.getMessage())
@@ -49,7 +51,7 @@ public class ExpenseController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ExpenseResponse> updateExpense(@PathVariable("id") Long id, @RequestBody ExpenseRequest expenseRequest) {
+    public ApiResponse<ExpenseResponse> updateExpense(@PathVariable("id") Long id, @Valid @RequestBody ExpenseRequest expenseRequest) {
         return ApiResponse.<ExpenseResponse>builder()
                 .code(ResponseCode.UPDATE_EXPENSE.getCode())
                 .message(ResponseCode.UPDATE_EXPENSE.getMessage())
@@ -76,11 +78,22 @@ public class ExpenseController {
     }
 
     @GetMapping("/date")
-    public ApiResponse<List<ExpenseResponse>> getExpenseBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
-        return ApiResponse.<List<ExpenseResponse>>builder()
-                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
-                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+    public ApiResponse<PagingResponse<ExpenseResponse>> getExpenseBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+        return ApiResponse.<PagingResponse<ExpenseResponse>>builder()
+                .code(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getCode())
+                .message(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getMessage())
                 .data(expenseService.getExpenseBetweenDates(dateRangeRequest))
+                .build();
+    }
+
+    @GetMapping("/paginate")
+    public ApiResponse<PagingResponse<ExpenseResponse>> getAllExpenseWithPaginate(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return ApiResponse.<PagingResponse<ExpenseResponse>>builder()
+                .code(ResponseCode.GET_EXPENSES_PAGINATE.getCode())
+                .message(ResponseCode.GET_EXPENSES_PAGINATE.getMessage())
+                .data(expenseService.getAllExpenseWithPaginate(page, size))
                 .build();
     }
 

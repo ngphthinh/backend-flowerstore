@@ -1,5 +1,10 @@
 package com.ngphthinh.flower.dto.request;
 
+import com.ngphthinh.flower.validator.MinValue;
+import com.ngphthinh.flower.validator.ValidMoney;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +15,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CreateOrderBaseRequest {
+
+    @NotNull(message = "INVALID_STORE_ID")
     private Long storeId;
+
+    @NotBlank(message = "INVALID_PRODUCT_NAME")
     private String productName;
+
+    @ValidMoney(message = "INVALID_PRODUCT_PRICE")
     private double price;
+
     private String note;
+
+    @MinValue(min = 1, message = "INVALID_PRODUCT_QUANTITY")
     private int quantity;
 }

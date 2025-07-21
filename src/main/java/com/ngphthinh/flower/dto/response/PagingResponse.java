@@ -8,9 +8,9 @@ import java.util.List;
 @Data
 @Builder
 public class PagingResponse<T> {
-    private List<T> content;
     private int page;
     private int size;
     private long totalElements;
     private int totalPages;
+    private List<T> content;
 }

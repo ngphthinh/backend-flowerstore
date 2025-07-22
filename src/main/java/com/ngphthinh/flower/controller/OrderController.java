@@ -106,8 +106,8 @@ public class OrderController {
 
     @GetMapping("/paginate")
     public ApiResponse<PagingResponse<OrderResponse>> getOrdersPaginate(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size
     ) {
         return ApiResponse.<PagingResponse<OrderResponse>>builder()
                 .code(ResponseCode.GET_ORDERS_PAGINATE.getCode())

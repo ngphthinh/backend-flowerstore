@@ -1,0 +1,142 @@
+package com.ngphthinh.flower.serivce;
+
+import com.ngphthinh.flower.dto.request.UserChangePasswordRequest;
+import com.ngphthinh.flower.dto.request.UserCreationRequest;
+import com.ngphthinh.flower.dto.request.UserUpdateRequest;
+import com.ngphthinh.flower.dto.response.PagingResponse;
+import com.ngphthinh.flower.dto.response.UserChangePasswordResponse;
+import com.ngphthinh.flower.dto.response.UserResponse;
+import com.ngphthinh.flower.entity.Role;
+import com.ngphthinh.flower.entity.Store;
+import com.ngphthinh.flower.entity.User;
+import com.ngphthinh.flower.exception.AppException;
+import com.ngphthinh.flower.exception.ErrorCode;
+import com.ngphthinh.flower.mapper.UserMapper;
+import com.ngphthinh.flower.repo.UserRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    @Value("${flower.default.password}")
+    private String PASSWORD_DEFAULT;
+    private static final String USER_ROLE = "USER";
+    private static final Logger log = LogManager.getLogger(UserService.class);
+
+    private static final String PHONE_KEY = "phoneNumber";
+
+    private final StoreService storeService;
+
+    private final UserRepository userRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final RoleService roleService;
+
+    private final UserMapper userMapper;
+
+    public UserService(StoreService storeService, UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService, UserMapper userMapper) {
+        this.storeService = storeService;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
+        this.userMapper = userMapper;
+    }
+
+    public UserResponse createUser(UserCreationRequest request) {
+
+        Store store = storeService.getStoreEntityById(request.getStoreId());
+
+        User user = userMapper.toUser(request);
+
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            throw new AppException(ErrorCode.PHONE_NUMBER_EXISTS);
+        }
+
+        // get role user
+        Role role = roleService.getRoleEntityById(USER_ROLE);
+        if (role == null) {
+            throw new AppException(ErrorCode.ROLE_NOT_FOUND);
+        }
+        user.setRole(role);
+        user.setStore(store);
+
+        log.info("Create user with role default: {}", USER_ROLE);
+
+        user.setPassword(passwordEncoder.encode(PASSWORD_DEFAULT));
+
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    public PagingResponse<UserResponse> getAllUsers(int page, int size) {
+        if (page < 1 || size < 1) {
+            throw new AppException(ErrorCode.INVALID_PAGINATION);
+        }
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        var pageResult = userRepository.findAll(pageable);
+
+        List<UserResponse> userResponses = pageResult.getContent().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+
+        return PagingResponse.<UserResponse>builder()
+                .size(size)
+                .page(page)
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .content(userResponses)
+                .build();
+    }
+
+    public UserResponse getUserByPhoneNumber(String phoneNumber) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, phoneNumber));
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse deleteUserByPhoneNumber(String phoneNumber) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, phoneNumber));
+        userRepository.delete(user);
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse updateUser(String phoneNumber, UserUpdateRequest request) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, phoneNumber));
+
+        Store store = storeService.getStoreEntityById(request.getStoreId());
+        Role role = roleService.getRoleEntityById(request.getRole());
+
+        user.setFullName(request.getFullName());
+        user.setRole(role);
+        user.setStore(store);
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    public UserChangePasswordResponse changePassword(UserChangePasswordRequest request) {
+        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, request.getPhoneNumber()));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.VERIFY_PASSWORD_FAILED);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return UserChangePasswordResponse.builder()
+                .success(true)
+                .build();
+    }
+
+}

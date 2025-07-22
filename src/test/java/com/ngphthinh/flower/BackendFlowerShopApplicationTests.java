@@ -1,9 +1,13 @@
 package com.ngphthinh.flower;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.entity.Expense;
+import com.ngphthinh.flower.entity.User;
 import com.ngphthinh.flower.repo.ExpenseRepository;
 import com.ngphthinh.flower.repo.OrderRepository;
+import com.ngphthinh.flower.repo.UserRepository;
 import com.ngphthinh.flower.serivce.ExpenseService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,27 +18,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 class BackendFlowerShopApplicationTests {
 
     @Autowired
-    ExpenseRepository expenseRepository;
+    UserRepository userRepository;
 
     @Autowired
-    OrderRepository orderRepository;
-
-    @Autowired
-    ExpenseService expenseService;
-
+    ObjectMapper objectMapper;
     @Test
-    void contextLoads() {
+    void contextLoads() throws JsonProcessingException {
+        User user = userRepository.findById(1L).orElseThrow(() -> new RuntimeException("User not found"));
 
-        var page = expenseService.getAllExpenseWithPaginate(1, 5);
+        System.out.println(user.getRole().getPermissions());
 
-
-        System.out.println(PagingResponse.<Expense>builder()
-                .page(1)
-                .totalPages(page.getTotalPages())
-                .totalElements(page.getTotalElements())
-//                .content(page.getContent())
-                .size(5)
-                .build());
     }
 
 }

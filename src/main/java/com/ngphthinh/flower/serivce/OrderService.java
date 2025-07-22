@@ -249,7 +249,7 @@ public class OrderService {
                 .totalElements(orderPage.getTotalElements())
                 .totalPages(orderPage.getTotalPages())
                 .page(page)
-                .page(size)
+                .size(size)
                 .build();
     }
 

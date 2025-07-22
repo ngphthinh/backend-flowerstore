@@ -28,7 +28,15 @@ public enum ResponseCode {
     GET_TOTAL_EXPENSE(200, "Total expense retrieved successfully"),
     GET_EXPENSES_PAGINATE(200, "Expense list retrieved successfully with pagination"),
     GET_EXPENSE_BETWEEN_DATE(200, "Expense list retrieved successfully between dates"),
-    ;
+
+    CREATE_USER(201, "User created successfully"),
+    GET_USER_LIST(200, "User list retrieved successfully"),
+    GET_USER_BY_PHONE(200, "User retrieved successfully by phone number"),
+    UPDATE_USER(200, "User updated successfully"),
+    DELETE_USER(200, "User deleted successfully"),
+    CHANGE_PASSWORD(200, "Password changed successfully"),
+
+    AUTHENTICATED(200, "User authenticated successfully");
 
 
     private final int code;

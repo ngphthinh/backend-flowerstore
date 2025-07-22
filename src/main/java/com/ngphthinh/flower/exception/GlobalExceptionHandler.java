@@ -22,6 +22,7 @@ public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
     private static final String ID_ATTRIBUTE = "id";
+    private static final String PHONE_ATTRIBUTE = "phoneNumber";
     private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
 
 
@@ -41,12 +42,7 @@ public class GlobalExceptionHandler {
         String message = e.getErrorCode().getMessage();
 
         if (Objects.nonNull(e.getKeyAttribute()) && Objects.nonNull(e.getAttributeValue())) {
-            if (e.getKeyAttribute().equals(ID_ATTRIBUTE)) {
-                message = mapAttributeId(e.getErrorCode().getMessage(), e.getAttributeValue());
-            }
-            if (e.getKeyAttribute().equals(MIN_ATTRIBUTE)) {
-                message = mapAttribute(e.getErrorCode().getMessage(), e.getAttributeValue());
-            }
+            message = mapAttribute(message, e.getKeyAttribute(), e.getAttributeValue());
         }
 
         ApiResponse<Void> apiResponse = new ApiResponse<>();
@@ -55,12 +51,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getErrorCode().getStatusCode()).body(apiResponse);
     }
 
-    private String mapAttributeId(String message, String id) {
-        if (message.contains("{" + ID_ATTRIBUTE + "}")) {
-            return message.replace("{" + ID_ATTRIBUTE + "}", id);
+    private String mapAttribute(String message, String attributeKey, String attributeValue) {
+        if (message.contains("{" + attributeKey + "}")) {
+            return message.replace("{" + attributeKey + "}", attributeValue);
         }
         return message;
     }
+
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
@@ -81,13 +78,15 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INVALID_UNCATEGORIZED;
         String message = e.getMessage();
 
+
         Class<?> errorTypeClass = e.getRequiredType();
+
 
         if (errorTypeClass == null) {
             errorTypeClass = e.getParameter().getParameterType();
         }
 
-        if (errorTypeClass == LocalDate.class ) {
+        if (errorTypeClass == LocalDate.class) {
             errorCode = ErrorCode.INVALID_DATE_FORMAT;
         } else if (Number.class.isAssignableFrom(errorTypeClass)) {
             errorCode = ErrorCode.INVALID_NUMBER_FORMAT;
@@ -123,7 +122,7 @@ public class GlobalExceptionHandler {
 
         var attribute = constraintViolation.getConstraintDescriptor().getAttributes();
 
-        String message = Objects.nonNull(attribute) ? mapAttribute(errorCode.getMessage(), String.valueOf(attribute.get(MIN_ATTRIBUTE))) : errorCode.getMessage();
+        String message = Objects.nonNull(attribute) ? mapAttribute(errorCode.getMessage(), MIN_ATTRIBUTE, String.valueOf(attribute.get(MIN_ATTRIBUTE))) : errorCode.getMessage();
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.<Void>builder()
                 .code(errorCode.getCode())
@@ -131,13 +130,6 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
-    private String mapAttribute(String message, String attributeValue) {
-
-        if (message.contains("{" + MIN_ATTRIBUTE + "}")) {
-            return message.replace("{" + MIN_ATTRIBUTE + "}", attributeValue);
-        }
-        return message;
-    }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     private ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(MissingServletRequestPartException e) {

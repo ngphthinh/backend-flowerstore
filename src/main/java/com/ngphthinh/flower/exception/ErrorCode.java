@@ -22,6 +22,11 @@ public enum ErrorCode {
     STORE_ID_NULL(1011, "Store id must not be null", HttpStatus.BAD_REQUEST),
     MISSING_REQUEST_PART(1012, "Please provide the required part", HttpStatus.BAD_REQUEST),
     INVALID_NUMBER_FORMAT(1013, "Invalid number format", HttpStatus.BAD_REQUEST),
+    PHONE_NUMBER_EXISTS(1014, "Phone number already exists", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1015, "Role not found", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND(1016, "User not found by phone number {phoneNumber}", HttpStatus.BAD_REQUEST),
+    UNAUTHENTICATED(1017, "Unauthenticated", HttpStatus.UNAUTHORIZED),
+    VERIFY_PASSWORD_FAILED(1018, "Verify password failed", HttpStatus.BAD_REQUEST),
 
     INVALID_UNCATEGORIZED(9998, "Invalid field uncategorized", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_AMOUNT_EXPENSE(1301, "Amount must be greater than {min}", HttpStatus.BAD_REQUEST),
@@ -45,9 +50,15 @@ public enum ErrorCode {
     INVALID_PAGE_SIZE(1314, "Page size must be greater than {min}", HttpStatus.BAD_REQUEST),
     INVALID_PAGE(1315, "Page must be greater than {min}", HttpStatus.BAD_REQUEST),
 
+    INVALID_PHONE_NUMBER(1316, "Phone number must not be empty", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1317, "Password must not be empty", HttpStatus.BAD_REQUEST),
 
+    INVALID_ROLE_NAME(1318, "Role name must not be empty", HttpStatus.BAD_REQUEST),
+    INVALID_ROLE_UPPERCASE(1319, "Role name must be uppercase", HttpStatus.BAD_REQUEST),
+
+    INVALID_PERMISSION_NAME(1320, "Permission must not be empty", HttpStatus.BAD_REQUEST),
+    INVALID_PERMISSION_UPPERCASE(1321, "Permission name must be uppercase", HttpStatus.BAD_REQUEST),
     ;
-
 
     private final int code;
     private final String message;

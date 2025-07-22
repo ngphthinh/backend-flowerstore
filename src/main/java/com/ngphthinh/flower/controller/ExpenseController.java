@@ -88,13 +88,14 @@ public class ExpenseController {
 
     @GetMapping("/paginate")
     public ApiResponse<PagingResponse<ExpenseResponse>> getAllExpenseWithPaginate(
-            @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "page", defaultValue = "1", required = false) Integer page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) Integer size) {
         return ApiResponse.<PagingResponse<ExpenseResponse>>builder()
                 .code(ResponseCode.GET_EXPENSES_PAGINATE.getCode())
                 .message(ResponseCode.GET_EXPENSES_PAGINATE.getMessage())
                 .data(expenseService.getAllExpenseWithPaginate(page, size))
                 .build();
     }
+
 
 }

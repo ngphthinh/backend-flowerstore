@@ -1,6 +1,7 @@
 package com.ngphthinh.flower.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StoreRequest {
+public class UserCreationRequest {
 
-    @NotBlank(message = "INVALID_NAME_STORE")
-    private String name;
+    @NotBlank(message = "INVALID_PHONE_NUMBER")
+    // valid phone
+    private String phoneNumber;
 
-    @NotBlank(message = "INVALID_ADDRESS_STORE")
-    private String address;
+    @NotNull(message = "STORE_ID_NULL")
+    private Long storeId;
+
 }

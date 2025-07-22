@@ -229,7 +229,6 @@ public class OrderService {
     }
 
 
-
     public PagingResponse<OrderResponse> getAllOrderWithPaginate(int page, int size) {
         if (page < 1 || size < 1) {
             throw new AppException(ErrorCode.INVALID_PAGINATION);
@@ -262,8 +261,8 @@ public class OrderService {
             throw new AppException(ErrorCode.INVALID_DATE_RANGE);
         }
 
-        if (storeId == null || !storeService.isStoreExist(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_FOUND);
+        if (!storeService.isStoreExist(storeId)) {
+            throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
         }
 
         BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
@@ -281,8 +280,8 @@ public class OrderService {
 
         LocalDateTime startDate = date.atStartOfDay();
         LocalDateTime endDate = date.atTime(LocalTime.MAX);
-        if (storeId == null || !storeService.isStoreExist(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_FOUND);
+        if (!storeService.isStoreExist(storeId)) {
+            throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
         }
 
         BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository

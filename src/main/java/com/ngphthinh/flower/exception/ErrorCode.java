@@ -21,7 +21,7 @@ public enum ErrorCode {
     INVALID_DATE_RANGE(1010, "Start date must be before end date", HttpStatus.BAD_REQUEST),
     STORE_ID_NULL(1011, "Store id must not be null", HttpStatus.BAD_REQUEST),
     MISSING_REQUEST_PART(1012, "Please provide the required part", HttpStatus.BAD_REQUEST),
-
+    INVALID_NUMBER_FORMAT(1013, "Invalid number format", HttpStatus.BAD_REQUEST),
 
     INVALID_UNCATEGORIZED(9998, "Invalid field uncategorized", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_AMOUNT_EXPENSE(1301, "Amount must be greater than {min}", HttpStatus.BAD_REQUEST),

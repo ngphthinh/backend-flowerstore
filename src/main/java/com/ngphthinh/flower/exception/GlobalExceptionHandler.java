@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
@@ -77,9 +78,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        ErrorCode errorCode = ErrorCode.INVALID_DATE_FORMAT;
+        ErrorCode errorCode = ErrorCode.INVALID_UNCATEGORIZED;
         String message = e.getMessage();
 
+        Class<?> errorTypeClass = e.getRequiredType();
+
+        if (errorTypeClass == null) {
+            errorTypeClass = e.getParameter().getParameterType();
+        }
+
+        if (errorTypeClass == LocalDate.class ) {
+            errorCode = ErrorCode.INVALID_DATE_FORMAT;
+        } else if (Number.class.isAssignableFrom(errorTypeClass)) {
+            errorCode = ErrorCode.INVALID_NUMBER_FORMAT;
+        }
 
         if (e.getValue() != null) {
             message = String.format("Invalid value '%s' for parameter '%s'", e.getValue(), e.getName());

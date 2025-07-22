@@ -14,6 +14,12 @@ public class MinValueValidator implements ConstraintValidator<MinValue, Number> 
 
     @Override
     public boolean isValid(Number value, jakarta.validation.ConstraintValidatorContext context) {
-        return value != null && value.doubleValue() >= min;
+
+        // Null values are considered valid and will be handled by @NotNull or similar annotations.
+        if (value == null) {
+            return true;
+        }
+
+        return value.doubleValue() >= min;
     }
 }

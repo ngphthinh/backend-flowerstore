@@ -27,5 +27,6 @@ public class CreateOrderBaseRequest {
     private String note;
 
     @MinValue(min = 1, message = "INVALID_PRODUCT_QUANTITY")
+    @NotNull(message = "INVALID_PRODUCT_QUANTITY")
     private int quantity;
 }

@@ -58,6 +58,12 @@ public enum ErrorCode {
 
     INVALID_PERMISSION_NAME(1320, "Permission must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_PERMISSION_UPPERCASE(1321, "Permission name must be uppercase", HttpStatus.BAD_REQUEST),
+
+    GENERATE_TOKEN_FAILED(1322, "Generate token failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    INTROSPECT_FAILED(1323, "Introspect token failed", HttpStatus.INTERNAL_SERVER_ERROR),
+
+
+
     ;
 
     private final int code;

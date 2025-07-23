@@ -36,7 +36,10 @@ public enum ResponseCode {
     DELETE_USER(200, "User deleted successfully"),
     CHANGE_PASSWORD(200, "Password changed successfully"),
 
-    AUTHENTICATED(200, "User authenticated successfully");
+    AUTHENTICATED(200, "User authenticated successfully"),
+    INTROSPECTED(200, "User introspected successfully"),
+    LOGGED_OUT(204, "User logged out successfully"),
+    ;
 
 
     private final int code;

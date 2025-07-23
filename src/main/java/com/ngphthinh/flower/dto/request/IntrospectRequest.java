@@ -1,4 +1,4 @@
-package com.ngphthinh.flower.dto.response;
+package com.ngphthinh.flower.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthenticationResponse {
+public class IntrospectRequest {
     private String accessToken;
-    private String phoneNumber;
-    private String roleAndPermission;
-    private String refreshToken;
 }

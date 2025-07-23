@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthenticationResponse {
-    private String accessToken;
-    private String phoneNumber;
-    private String roleAndPermission;
-    private String refreshToken;
+public class IntrospectResponse {
+    private boolean isValid;
 }

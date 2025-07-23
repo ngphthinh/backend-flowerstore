@@ -3,7 +3,6 @@ package com.ngphthinh.flower.validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import javax.xml.stream.XMLInputFactory;
 import java.math.BigDecimal;
 
 
@@ -19,7 +18,7 @@ public class MoneyValidator implements ConstraintValidator<ValidMoney, BigDecima
 
     @Override
     public boolean isValid(BigDecimal money, ConstraintValidatorContext constraintValidatorContext) {
-        return money != null && money.compareTo(min) > 0;
+        return money != null && money.compareTo(min) >= 0;
     }
 
 }

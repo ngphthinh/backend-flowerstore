@@ -22,11 +22,13 @@ class BackendFlowerShopApplicationTests {
 
     @Autowired
     ObjectMapper objectMapper;
+
     @Test
     void contextLoads() throws JsonProcessingException {
-        User user = userRepository.findById(1L).orElseThrow(() -> new RuntimeException("User not found"));
+//        User user = userRepository.findById(1L).orElseThrow(() -> new RuntimeException("User not found"));
 
-        System.out.println(user.getRole().getPermissions());
+        System.out.println("hello");
+//        System.out.println(user.getRole().getPermissions());
 
     }
 

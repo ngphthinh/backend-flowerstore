@@ -1,6 +1,6 @@
 package com.ngphthinh.flower.dto.request;
 
-import com.ngphthinh.flower.validator.ValidDateAfterToday;
+import com.ngphthinh.flower.validator.ValidDateBeforeToday;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Builder
 public class DateRangeRequest {
 
-    @ValidDateAfterToday(message = "INVALID_START_DATE")
+    @ValidDateBeforeToday(message = "INVALID_START_DATE")
     @NotNull(message = "INVALID_START_DATE")
     private LocalDate startDate;
 

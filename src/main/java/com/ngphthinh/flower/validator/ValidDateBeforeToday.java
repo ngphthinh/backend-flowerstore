@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {DateTimeAfterTodayValidator.class, DateAfterTodayValidator.class})
-public @interface ValidDateAfterToday {
+@Constraint(validatedBy = {DateTimeBeforeTodayValidator.class, DateBeforeTodayValidator.class})
+public @interface ValidDateBeforeToday {
     String message() default "Invalid date";
 
     Class<?>[] groups() default {};

@@ -16,6 +16,6 @@ public class MoneyValidatorDouble implements ConstraintValidator<ValidMoney, Dou
 
     @Override
     public boolean isValid(Double money, ConstraintValidatorContext constraintValidatorContext) {
-        return money != null && money > min;
+        return money != null && money >= min;
     }
 }

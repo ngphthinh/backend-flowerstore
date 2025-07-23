@@ -5,10 +5,10 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.LocalDateTime;
 
-public class DateTimeAfterTodayValidator implements ConstraintValidator<ValidDateAfterToday, LocalDateTime> {
+public class DateTimeBeforeTodayValidator implements ConstraintValidator<ValidDateBeforeToday, LocalDateTime> {
 
     @Override
-    public void initialize(ValidDateAfterToday constraintAnnotation) {
+    public void initialize(ValidDateBeforeToday constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 

@@ -6,7 +6,7 @@ public enum DeliveryMethod {
 
     public static boolean isValid(String method) {
         for (DeliveryMethod deliveryMethod : DeliveryMethod.values()) {
-            if (deliveryMethod.name().equalsIgnoreCase(method)) {
+            if (deliveryMethod.name().equals(method)) {
                 return true;
             }
         }

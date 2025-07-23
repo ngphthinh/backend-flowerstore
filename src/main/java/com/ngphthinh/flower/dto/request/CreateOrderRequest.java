@@ -1,6 +1,6 @@
 package com.ngphthinh.flower.dto.request;
 
-import com.ngphthinh.flower.validator.ValidDateAfterToday;
+import com.ngphthinh.flower.validator.ValidDateBeforeToday;
 import com.ngphthinh.flower.validator.ValidDeliveryMethod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +26,7 @@ public class CreateOrderRequest {
     @ValidDeliveryMethod(message = "INVALID_DELIVERY_METHOD")
     private String deliveryMethod;
 
-    @ValidDateAfterToday(message = "INVALID_ORDER_DATE")
+    @ValidDateBeforeToday(message = "INVALID_ORDER_DATE")
     private LocalDateTime orderDate;
     private String note;
 

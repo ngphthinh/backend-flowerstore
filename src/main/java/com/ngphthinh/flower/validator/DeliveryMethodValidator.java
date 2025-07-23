@@ -15,6 +15,7 @@ public class DeliveryMethodValidator implements ConstraintValidator<ValidDeliver
 
     @Override
     public boolean isValid(String deliveryMethod, ConstraintValidatorContext constraintValidatorContext) {
-        return deliveryMethod != null && DeliveryMethod.isValid(deliveryMethod);
+        String deliveryMethodUpperCase = deliveryMethod != null ? deliveryMethod.toUpperCase() : null;
+        return deliveryMethod != null && DeliveryMethod.isValid(deliveryMethodUpperCase);
     }
 }

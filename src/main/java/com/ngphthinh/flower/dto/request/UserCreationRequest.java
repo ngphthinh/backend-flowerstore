@@ -1,5 +1,6 @@
 package com.ngphthinh.flower.dto.request;
 
+import com.ngphthinh.flower.validator.ValidPhone;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class UserCreationRequest {
 
     @NotBlank(message = "INVALID_PHONE_NUMBER")
-    // valid phone
+    @ValidPhone
     private String phoneNumber;
 
     @NotNull(message = "STORE_ID_NULL")

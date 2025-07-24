@@ -1,5 +1,6 @@
 package com.ngphthinh.flower.exception;
 
+import jakarta.persistence.Id;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -51,7 +52,8 @@ public enum ErrorCode {
     INVALID_PAGE(1315, "Page must be greater than {min}", HttpStatus.BAD_REQUEST),
 
     INVALID_PHONE_NUMBER(1316, "Phone number must not be empty", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(1317, "Password must not be empty", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD_REGEX(1376, "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character", HttpStatus.BAD_REQUEST),
+
 
     INVALID_ROLE_NAME(1318, "Role name must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_ROLE_UPPERCASE(1319, "Role name must be uppercase", HttpStatus.BAD_REQUEST),
@@ -64,6 +66,9 @@ public enum ErrorCode {
 
     REFRESH_TOKEN_EXPIRED(1324, "Refresh token expired", HttpStatus.UNAUTHORIZED),
 
+    INVALID_PHONE_REGEX(1325, "Phone number must be in the format +84XXXXXXXXX or 0XXXXXXXXX", HttpStatus.BAD_REQUEST),
+    INVALID_ACCESS_TOKEN(1326, "Access must not be empty", HttpStatus.BAD_REQUEST),
+    INVALID_REFRESH_TOKEN(1327, "Refresh token must not be empty", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

@@ -39,6 +39,8 @@ public enum ResponseCode {
     AUTHENTICATED(200, "User authenticated successfully"),
     INTROSPECTED(200, "User introspected successfully"),
     LOGGED_OUT(204, "User logged out successfully"),
+
+    REFRESHED(200, "Token refreshed successfully"),
     ;
 
 

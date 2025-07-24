@@ -62,7 +62,7 @@ public enum ErrorCode {
     GENERATE_TOKEN_FAILED(1322, "Generate token failed", HttpStatus.INTERNAL_SERVER_ERROR),
     INTROSPECT_FAILED(1323, "Introspect token failed", HttpStatus.INTERNAL_SERVER_ERROR),
 
-
+    REFRESH_TOKEN_EXPIRED(1324, "Refresh token expired", HttpStatus.UNAUTHORIZED),
 
     ;
 

@@ -3,15 +3,14 @@ package com.ngphthinh.flower.serivce;
 import com.ngphthinh.flower.dto.request.AuthenticationRequest;
 import com.ngphthinh.flower.dto.request.IntrospectRequest;
 import com.ngphthinh.flower.dto.request.LogoutRequest;
+import com.ngphthinh.flower.dto.request.RefreshTokenRequest;
 import com.ngphthinh.flower.dto.response.AuthenticationResponse;
 import com.ngphthinh.flower.dto.response.IntrospectResponse;
-import com.ngphthinh.flower.entity.ActiveToken;
 import com.ngphthinh.flower.entity.Permission;
 import com.ngphthinh.flower.entity.Role;
 import com.ngphthinh.flower.entity.User;
 import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
-import com.ngphthinh.flower.repo.ActiveTokenRepository;
 import com.ngphthinh.flower.repo.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
@@ -38,7 +35,9 @@ public class AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final ActiveTokenRepository activeTokenRepository;
+    private final TokenBlackListService tokenBlackListService;
+
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${jwt.valid-duration}")
     private Long VALID_DURATION;
@@ -46,10 +45,11 @@ public class AuthenticationService {
     @Value("${jwt.secret-key}")
     private String SECRET_KEY;
 
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, ActiveTokenRepository activeTokenRepository) {
+    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenBlackListService tokenBlackListService, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.activeTokenRepository = activeTokenRepository;
+        this.tokenBlackListService = tokenBlackListService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -63,11 +63,15 @@ public class AuthenticationService {
         }
 
         String token = generateAccessToken(user);
+        String refreshToken = UUID.randomUUID().toString();
+
+        refreshTokenService.saveRefreshToken(refreshToken, user.getId().toString());
+
         return AuthenticationResponse.builder()
                 .accessToken(token)
                 .phoneNumber(user.getPhoneNumber())
                 .roleAndPermission(buildScope(user))
-                .refreshToken("refresh-token-placeholder")
+                .refreshToken(refreshToken)
                 .build();
 
     }
@@ -93,30 +97,20 @@ public class AuthenticationService {
 
         try {
             jwsObject.sign(new MACSigner(SECRET_KEY.getBytes()));
-            // Store the token in the active token repository
-            saveActiveToken(claimSet);
             return jwsObject.serialize();
         } catch (JOSEException e) {
             throw new AppException(ErrorCode.GENERATE_TOKEN_FAILED);
         }
     }
 
-    private void saveActiveToken(JWTClaimsSet claimSet) {
-        ActiveToken activeToken = ActiveToken.builder()
-                .id(claimSet.getJWTID())
-                .expiryTime(LocalDateTime.ofInstant(claimSet.getExpirationTime().toInstant(), ZoneId.systemDefault()))
-                .build();
-        activeTokenRepository.save(activeToken);
-    }
-
 
     public IntrospectResponse introspect(IntrospectRequest request) {
-
         String token = request.getAccessToken();
         boolean isValid = true;
 
         try {
-            verifyToken(token, false);
+            verifyToken(token);
+
         } catch (AppException e) {
             isValid = false;
         }
@@ -126,7 +120,7 @@ public class AuthenticationService {
 
     }
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) {
+    private SignedJWT verifyToken(String token) {
         try {
             JWSVerifier jwsVerifier = new MACVerifier(SECRET_KEY.getBytes());
 
@@ -136,14 +130,16 @@ public class AuthenticationService {
 
             Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
+            // verify failed and expired
             if (!(verify && expirationTime.after(new Date()))) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
 
-            if (!activeTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+            // Check if blacklisted
+            String jitToken = signedJWT.getJWTClaimsSet().getJWTID();
+            if (tokenBlackListService.isBlacklisted(jitToken)) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
-
             return signedJWT;
         } catch (JOSEException | ParseException e) {
             throw new AppException(ErrorCode.INTROSPECT_FAILED);
@@ -151,14 +147,57 @@ public class AuthenticationService {
     }
 
     public void logout(LogoutRequest request) {
+        String token = request.getAccessToken();
+        String refreshToken = request.getRefreshToken();
+        SignedJWT signedJWT = verifyToken(token);
+
         try {
-            SignedJWT signedJWT = verifyToken(request.getAccessToken(), false);
-            activeTokenRepository.deleteById(signedJWT.getJWTClaimsSet().getJWTID());
-        } catch (AppException | ParseException e) {
+            String jitToken = signedJWT.getJWTClaimsSet().getJWTID();
+            long expirationTime = getSecondsUntilExpiration(signedJWT.getJWTClaimsSet().getExpirationTime());
+
+            // store blacklist
+            tokenBlackListService.blacklistToken(jitToken, expirationTime);
+
+            refreshTokenService.deleteRefreshToken(refreshToken);
+        } catch (ParseException e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+
     }
 
+    private long getSecondsUntilExpiration(Date expirationDate) {
+        long expirationEpoch = expirationDate.toInstant().getEpochSecond();
+        long nowEpoch = Instant.now().getEpochSecond();
+        return expirationEpoch - nowEpoch;
+    }
+
+    public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+
+        if (!refreshTokenService.isRefreshTokenExists(refreshToken)) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+        // get user id for refresh token
+        Long userId = Long.valueOf(refreshTokenService.getUserId(refreshToken));
+
+        // delete old refresh token
+        refreshTokenService.deleteRefreshToken(refreshToken);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED));
+
+        String token = generateAccessToken(user);
+        String newRefreshToken = UUID.randomUUID().toString();
+
+        refreshTokenService.saveRefreshToken(newRefreshToken, userId.toString());
+
+        return AuthenticationResponse.builder()
+                .accessToken(token)
+                .phoneNumber(user.getPhoneNumber())
+                .roleAndPermission(buildScope(user))
+                .refreshToken(newRefreshToken)
+                .build();
+    }
 
     private String buildScope(User user) {
         if (user.getRole() != null) {

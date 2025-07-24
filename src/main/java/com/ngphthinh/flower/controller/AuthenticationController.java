@@ -1,9 +1,9 @@
 package com.ngphthinh.flower.controller;
 
-import com.cloudinary.Api;
 import com.ngphthinh.flower.dto.request.AuthenticationRequest;
 import com.ngphthinh.flower.dto.request.IntrospectRequest;
 import com.ngphthinh.flower.dto.request.LogoutRequest;
+import com.ngphthinh.flower.dto.request.RefreshTokenRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.AuthenticationResponse;
 import com.ngphthinh.flower.dto.response.IntrospectResponse;
@@ -49,6 +49,15 @@ public class AuthenticationController {
         return ApiResponse.<Void>builder()
                 .code(ResponseCode.LOGGED_OUT.getCode())
                 .message(ResponseCode.LOGGED_OUT.getMessage())
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticationResponse> authenticate(@Valid @RequestBody RefreshTokenRequest request) {
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(ResponseCode.REFRESHED.getCode())
+                .message(ResponseCode.REFRESHED.getMessage())
+                .data(authenticationService.refreshToken(request))
                 .build();
     }
 

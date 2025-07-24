@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,8 +22,6 @@ public class GlobalExceptionHandler {
 
 
     private static final String MIN_ATTRIBUTE = "min";
-    private static final String ID_ATTRIBUTE = "id";
-    private static final String PHONE_ATTRIBUTE = "phoneNumber";
     private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
 
 
@@ -31,8 +30,7 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> apiResponse = new ApiResponse<>();
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage() + ": " + e.getMessage());
-//        log.error(e.getMessage());
-        e.printStackTrace();
+        log.error(e.getMessage());
         return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode()).body(apiResponse);
     }
 
@@ -137,5 +135,14 @@ public class GlobalExceptionHandler {
         apiResponse.setCode(ErrorCode.MISSING_REQUEST_PART.getCode());
         apiResponse.setMessage(ErrorCode.MISSING_REQUEST_PART.getMessage() + ": " + e.getRequestPartName());
         return ResponseEntity.status(ErrorCode.MISSING_REQUEST_PART.getStatusCode()).body(apiResponse);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity.status(ErrorCode.UNAUTHORIZED.getStatusCode())
+                .body(ApiResponse.<Void>builder()
+                        .code(ErrorCode.UNAUTHORIZED.getCode())
+                        .message(ErrorCode.UNAUTHORIZED.getMessage())
+                        .build());
     }
 }

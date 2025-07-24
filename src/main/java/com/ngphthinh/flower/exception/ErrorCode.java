@@ -54,7 +54,6 @@ public enum ErrorCode {
     INVALID_PHONE_NUMBER(1316, "Phone number must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD_REGEX(1376, "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character", HttpStatus.BAD_REQUEST),
 
-
     INVALID_ROLE_NAME(1318, "Role name must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_ROLE_UPPERCASE(1319, "Role name must be uppercase", HttpStatus.BAD_REQUEST),
 
@@ -64,11 +63,12 @@ public enum ErrorCode {
     GENERATE_TOKEN_FAILED(1322, "Generate token failed", HttpStatus.INTERNAL_SERVER_ERROR),
     INTROSPECT_FAILED(1323, "Introspect token failed", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    REFRESH_TOKEN_EXPIRED(1324, "Refresh token expired", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_EXPIRED(1324, "Refresh token expired", HttpStatus.BAD_REQUEST),
 
     INVALID_PHONE_REGEX(1325, "Phone number must be in the format +84XXXXXXXXX or 0XXXXXXXXX", HttpStatus.BAD_REQUEST),
     INVALID_ACCESS_TOKEN(1326, "Access must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_REFRESH_TOKEN(1327, "Refresh token must not be empty", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED(992, "You do not have permission", HttpStatus.FORBIDDEN),
     ;
 
     private final int code;

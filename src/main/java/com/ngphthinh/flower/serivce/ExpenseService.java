@@ -13,6 +13,7 @@ import com.ngphthinh.flower.repo.ExpenseRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -56,6 +57,9 @@ public class ExpenseService {
     }
 
     public List<ExpenseResponse> getAllExpenses() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        System.out.println(auth.getName());
         return expenseRepository.findAll()
                 .stream()
                 .map(expenseMapper::toExpenseResponse)

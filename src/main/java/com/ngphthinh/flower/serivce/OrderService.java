@@ -19,6 +19,7 @@ import jakarta.validation.ConstraintViolation;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,6 +57,7 @@ public class OrderService {
         this.orderDetailService = orderDetailService;
     }
 
+    @PreAuthorize("hasAuthority('CREATE_INVOICE')")
     public OrderResponse createOrder(String jsonOrder, String jsonOrderDetail, List<MultipartFile> images, String jsonArrayImgIndexes) {
         try {
             // Convert data raw
@@ -92,6 +94,7 @@ public class OrderService {
         }
     }
 
+
     private void validateRequest(CreateOrderRequest createOrderRequest) {
         Set<ConstraintViolation<CreateOrderRequest>> violations = validator.validate(createOrderRequest);
         if (!violations.isEmpty()) {
@@ -100,6 +103,7 @@ public class OrderService {
         }
     }
 
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public OrderResponse getOrderById(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "id", id.toString()));
         List<OrderDetailResponse> orderDetailResponses = orderDetailService.getOrderDetailsByOrderId(id);
@@ -109,6 +113,7 @@ public class OrderService {
         return orderResponse;
     }
 
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public List<OrderResponse> getAllInvoices() {
 
         List<OrderResponse> orderResponses = orderRepository.findAll().stream()
@@ -120,6 +125,7 @@ public class OrderService {
         return orderResponses;
     }
 
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(orderMapper::toOrderResponse).toList();
@@ -138,6 +144,7 @@ public class OrderService {
                 .toList();
     }
 
+    @PreAuthorize("hasAuthority('DELETE_INVOICE')")
     public OrderResponse deleteOrder(Long id) {
         OrderResponse orderResponse = getOrderById(id);
         orderDetailService.deleteOrderDetailByOrderId(id);
@@ -145,6 +152,7 @@ public class OrderService {
         return orderResponse;
     }
 
+    @PreAuthorize("hasAuthority('CREATE_INVOICE')")
     public OrderResponse createOrder(CreateOrderBaseRequest request) {
 
         Store store = storeService.getStoreEntityById(request.getStoreId());
@@ -165,6 +173,7 @@ public class OrderService {
         return orderResponse;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public TotalPriceOrderResponse getTotalPriceBetweenDates(DateRangeRequest dateRangeRequest) {
         LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
         LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
@@ -181,6 +190,7 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public TotalPriceOrderResponse getTotalPriceByDate(LocalDate date) {
         LocalDateTime startDate = date.atStartOfDay();
         LocalDateTime endDate = date.atTime(LocalTime.MAX);
@@ -196,6 +206,7 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public PagingResponse<OrderResponse> getOrderByBetweenDates(DateRangeRequest dateRangeRequest) {
         LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
         LocalDateTime enDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
@@ -229,6 +240,7 @@ public class OrderService {
     }
 
 
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public PagingResponse<OrderResponse> getAllOrderWithPaginate(int page, int size) {
         if (page < 1 || size < 1) {
             throw new AppException(ErrorCode.INVALID_PAGINATION);
@@ -253,16 +265,18 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public TotalPriceOrderResponse getTotalPriceByStoreIdAndDateRange(Long storeId, DateRangeRequest dateRangeRequest) {
+
+
+        if (!storeService.isStoreExist(storeId)) {
+            throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
+        }
         LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
         LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
 
         if (startDate.isAfter(endDate)) {
             throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
-
-        if (!storeService.isStoreExist(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
         }
 
         BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
@@ -276,6 +290,7 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public TotalPriceOrderResponse getTotalPriceByStoreIdAndDate(Long storeId, LocalDate date) {
 
         LocalDateTime startDate = date.atStartOfDay();

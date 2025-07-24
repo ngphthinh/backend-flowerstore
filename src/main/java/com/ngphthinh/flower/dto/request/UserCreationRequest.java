@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserCreationRequest {
+    private String fullName;
 
     @NotBlank(message = "INVALID_PHONE_NUMBER")
     @ValidPhone

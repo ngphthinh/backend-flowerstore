@@ -41,6 +41,7 @@ public enum ResponseCode {
     LOGGED_OUT(204, "User logged out successfully"),
 
     REFRESHED(200, "Token refreshed successfully"),
+    GET_MY_PROFILE(200, "User profile retrieved successfully"),
     ;
 
 

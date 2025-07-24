@@ -2,7 +2,7 @@ package com.ngphthinh.flower.controller;
 
 import com.ngphthinh.flower.dto.request.UserChangePasswordRequest;
 import com.ngphthinh.flower.dto.request.UserCreationRequest;
-import com.ngphthinh.flower.dto.request.UserUpdateRequest;
+import com.ngphthinh.flower.dto.request.UserAdminUpdateRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.dto.response.UserChangePasswordResponse;
@@ -56,7 +56,7 @@ public class UserController {
     @PutMapping("/{phone}")
     public ApiResponse<UserResponse> updateUser(
             @PathVariable String phone,
-            @RequestBody UserUpdateRequest request
+            @RequestBody UserAdminUpdateRequest request
     ) {
         return ApiResponse.<UserResponse>builder()
                 .code(ResponseCode.UPDATE_USER.getCode())
@@ -74,13 +74,21 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping("/change-password")
-    public ApiResponse<UserChangePasswordResponse> changePassword(@Valid @RequestBody UserChangePasswordRequest request) {
-        return ApiResponse.<UserChangePasswordResponse>builder()
-                .code(ResponseCode.CHANGE_PASSWORD.getCode())
-                .message(ResponseCode.CHANGE_PASSWORD.getMessage())
-                .data(userService.changePassword(request))
+//    @PostMapping("/change-password")
+//    public ApiResponse<UserChangePasswordResponse> changePassword(@Valid @RequestBody UserChangePasswordRequest request) {
+//        return ApiResponse.<UserChangePasswordResponse>builder()
+//                .code(ResponseCode.CHANGE_PASSWORD.getCode())
+//                .message(ResponseCode.CHANGE_PASSWORD.getMessage())
+//                .data(userService.changePassword(request))
+//                .build();
+//    }
+
+    @GetMapping("/profile")
+    public ApiResponse<UserResponse> getProfile() {
+        return ApiResponse.<UserResponse>builder()
+                .code(ResponseCode.GET_MY_PROFILE.getCode())
+                .message(ResponseCode.GET_MY_PROFILE.getMessage())
+                .data(userService.getProfile())
                 .build();
     }
-
 }

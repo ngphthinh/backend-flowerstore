@@ -3,14 +3,17 @@ package com.ngphthinh.flower.config;
 import com.ngphthinh.flower.entity.Permission;
 import com.ngphthinh.flower.entity.Role;
 import com.ngphthinh.flower.entity.Store;
+import com.ngphthinh.flower.entity.User;
 import com.ngphthinh.flower.repo.PermissionRepository;
 import com.ngphthinh.flower.repo.RoleRepository;
 import com.ngphthinh.flower.repo.StoreRepository;
+import com.ngphthinh.flower.repo.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Set;
@@ -20,8 +23,14 @@ public class AppInitConfig {
 
     private static final Logger log = LogManager.getLogger(AppInitConfig.class);
 
+//    private final PasswordEncoder passwordEncoder;
+
+//    public AppInitConfig(PasswordEncoder passwordEncoder) {
+//        this.passwordEncoder = passwordEncoder;
+//    }
+
     @Bean
-    ApplicationRunner applicationRunner(StoreRepository storeRepository, PermissionRepository permissionRepository, RoleRepository roleRepository) {
+    ApplicationRunner applicationRunner(StoreRepository storeRepository, PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository) {
         return args -> {
             if (storeRepository.count() == 0) {
                 List<Store> stores = List.of(
@@ -65,7 +74,16 @@ public class AppInitConfig {
                 roleRepository.saveAll(List.of(adminRole, userRole));
                 log.info("Default roles added to database for testing");
             }
-
+//            if (!userRepository.existsByPhoneNumber("0000000000")) {
+//                User adminUser = User.builder()
+//                        .phoneNumber("0000000000")
+//                        .password(passwordEncoder.encode("Admin@123"))
+//                        .store(storeRepository.findById(1L).orElse(null))
+//                        .role(roleRepository.findById("ADMIN").orElse(null))
+//                        .build();
+//                userRepository.save(adminUser);
+//                log.info("Default user added to database for testing");
+//            }
         };
     }
 }

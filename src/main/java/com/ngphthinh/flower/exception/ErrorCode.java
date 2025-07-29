@@ -52,7 +52,7 @@ public enum ErrorCode {
     INVALID_PAGE(1315, "Page must be greater than {min}", HttpStatus.BAD_REQUEST),
 
     INVALID_PHONE_NUMBER(1316, "Phone number must not be empty", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD_REGEX(1376, "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD_REGEX(1376, "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit", HttpStatus.BAD_REQUEST),
 
     INVALID_ROLE_NAME(1318, "Role name must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_ROLE_UPPERCASE(1319, "Role name must be uppercase", HttpStatus.BAD_REQUEST),

@@ -48,6 +48,8 @@ public class OrderService {
 
     private final OrderDetailService orderDetailService;
 
+
+
     public OrderService(StoreService storeService, Validator validator, OrderRepository orderRepository, ObjectMapper objectMapper, OrderMapper orderMapper, OrderDetailService orderDetailService) {
         this.storeService = storeService;
         this.validator = validator;
@@ -103,7 +105,7 @@ public class OrderService {
         }
     }
 
-    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
+//    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public OrderResponse getOrderById(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "id", id.toString()));
         List<OrderDetailResponse> orderDetailResponses = orderDetailService.getOrderDetailsByOrderId(id);
@@ -112,6 +114,9 @@ public class OrderService {
         orderResponse.setOrderDetailResponses(orderDetailResponses);
         return orderResponse;
     }
+
+
+
 
     @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public List<OrderResponse> getAllInvoices() {

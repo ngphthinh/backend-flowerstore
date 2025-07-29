@@ -45,6 +45,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(authorize ->
                 authorize.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/report/**").permitAll()
 
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole(ROLE_ADMIN)
 
@@ -83,6 +84,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         corsConfiguration.addAllowedOrigin("http://localhost:3000");
+//        corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
 

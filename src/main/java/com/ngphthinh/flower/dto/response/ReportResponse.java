@@ -1,0 +1,14 @@
+package com.ngphthinh.flower.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class ReportResponse {
+    private byte[] reportData;
+}

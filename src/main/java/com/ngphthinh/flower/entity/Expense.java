@@ -18,6 +18,7 @@ public class Expense {
     private String title;
     private double amount;
     private LocalDateTime date;
+    private String expenseType;
     private LocalDateTime createdAt;
 
     @PrePersist

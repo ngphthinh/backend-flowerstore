@@ -1,6 +1,7 @@
 package com.ngphthinh.flower.dto.request;
 
 import com.ngphthinh.flower.validator.ValidDateBeforeToday;
+import com.ngphthinh.flower.validator.ValidExpenseType;
 import com.ngphthinh.flower.validator.ValidMoney;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,9 @@ public class ExpenseRequest {
 
     @ValidMoney(message = "INVALID_AMOUNT_EXPENSE")
     private double amount;
+
+    @ValidExpenseType(message = "INVALID_EXPENSE_TYPE")
+    private String expenseType;
 
     @ValidDateBeforeToday(message = "INVALID_DATE_EXPENSE")
     private LocalDateTime date;

@@ -68,7 +68,8 @@ public enum ErrorCode {
     INVALID_PHONE_REGEX(1325, "Phone number must be in the format +84XXXXXXXXX or 0XXXXXXXXX", HttpStatus.BAD_REQUEST),
     INVALID_ACCESS_TOKEN(1326, "Access must not be empty", HttpStatus.BAD_REQUEST),
     INVALID_REFRESH_TOKEN(1327, "Refresh token must not be empty", HttpStatus.BAD_REQUEST),
-    UNAUTHORIZED(992, "You do not have permission", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED(1328, "You do not have permission", HttpStatus.FORBIDDEN),
+    INVALID_EXPENSE_TYPE(1329, "Expense type doesn't exist", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

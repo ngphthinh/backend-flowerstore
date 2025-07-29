@@ -17,6 +17,7 @@ import java.util.List;
 public class OrderResponse {
     private Long orderId;
     private String customerName;
+    private String customerPhone;
     private String deliveryMethod;
     private LocalDateTime orderDate;
     private String note;

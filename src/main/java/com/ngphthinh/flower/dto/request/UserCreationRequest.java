@@ -16,7 +16,7 @@ public class UserCreationRequest {
     private String fullName;
 
     @NotBlank(message = "INVALID_PHONE_NUMBER")
-    @ValidPhone
+    @ValidPhone(message = "INVALID_PHONE_REGEX")
     private String phoneNumber;
 
     @NotNull(message = "STORE_ID_NULL")

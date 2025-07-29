@@ -164,6 +164,7 @@ public class OrderService {
 
         Order order = Order.builder()
                 .customerName("Khách lẻ")
+                .customerPhone("N/A")
                 .deliveryMethod(DeliveryMethod.PICKUP.toString())
                 .orderDate(LocalDateTime.now())
                 .note(request.getNote())

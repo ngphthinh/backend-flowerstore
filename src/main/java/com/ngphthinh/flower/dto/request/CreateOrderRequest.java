@@ -2,6 +2,7 @@ package com.ngphthinh.flower.dto.request;
 
 import com.ngphthinh.flower.validator.ValidDateBeforeToday;
 import com.ngphthinh.flower.validator.ValidDeliveryMethod;
+import com.ngphthinh.flower.validator.ValidPhone;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,9 @@ public class CreateOrderRequest {
 
     @NotBlank(message = "INVALID_CUSTOMER_NAME")
     private String customerName;
+
+    @ValidPhone(message = "INVALID_PHONE_REGEX")
+    private String customerPhone;
 
     @ValidDeliveryMethod(message = "INVALID_DELIVERY_METHOD")
     private String deliveryMethod;

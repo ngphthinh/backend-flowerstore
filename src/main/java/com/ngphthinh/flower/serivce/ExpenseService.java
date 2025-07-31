@@ -2,6 +2,7 @@ package com.ngphthinh.flower.serivce;
 
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
+import com.ngphthinh.flower.dto.request.SumAmountExpenseByIdsRequest;
 import com.ngphthinh.flower.dto.response.ExpenseResponse;
 import com.ngphthinh.flower.dto.response.PagingResponse;
 import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
@@ -10,20 +11,22 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.ExpenseMapper;
 import com.ngphthinh.flower.repo.ExpenseRepository;
-import org.springframework.data.domain.PageRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ExpenseService {
 
+    private static final Logger log = LogManager.getLogger(ExpenseService.class);
     private final ExpenseRepository expenseRepository;
 
     private final ExpenseMapper expenseMapper;
@@ -57,9 +60,7 @@ public class ExpenseService {
     }
 
     public List<ExpenseResponse> getAllExpenses() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
 
-        System.out.println(auth.getName());
         return expenseRepository.findAll()
                 .stream()
                 .map(expenseMapper::toExpenseResponse)
@@ -87,23 +88,19 @@ public class ExpenseService {
                 .build();
     }
 
-    public PagingResponse<ExpenseResponse> getExpenseBetweenDates(DateRangeRequest dateRangeRequest) {
-        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
-        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
+    public PagingResponse<ExpenseResponse> getExpensesByFilter(Pageable pageable, LocalDate startDate, LocalDate endDate, String expenseType, String searchTerm) {
 
-        int page = dateRangeRequest.getPage();
-        int size = dateRangeRequest.getSize();
+        validatePaginate(pageable);
 
-        if (size < 1 || page < 1) {
-            throw new AppException(ErrorCode.INVALID_PAGINATION);
+        validateDateRange(startDate, endDate);
+        LocalDateTime startDateTime = Objects.nonNull(startDate) ? startDate.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0, 0);
+        LocalDateTime endDateTime = Objects.nonNull(endDate) ? endDate.atTime(LocalTime.MAX) : LocalDate.now().atTime(LocalTime.MAX);
+
+        if (expenseType.isEmpty()) {
+            expenseType = null;
         }
 
-        if (startDate.isAfter(endDate)) {
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
-
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("date").descending());
-        var expensesPage = expenseRepository.findExpensesByDateBetween(startDate, endDate, pageable);
+        var expensesPage = expenseRepository.findAllByFilter(startDateTime, endDateTime, expenseType, searchTerm, pageable);
 
         List<ExpenseResponse> expenseResponses = expensesPage.getContent().stream()
                 .map(expenseMapper::toExpenseResponse)
@@ -111,31 +108,49 @@ public class ExpenseService {
 
         return PagingResponse.<ExpenseResponse>builder()
                 .content(expenseResponses)
-                .page(page)
-                .size(size)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
                 .totalElements(expensesPage.getTotalElements())
-                .totalElements(expensesPage.getTotalElements())
+                .totalPages(expensesPage.getTotalPages())
                 .build();
     }
 
-    public PagingResponse<ExpenseResponse> getAllExpenseWithPaginate(int page, int size) {
-        if (page < 1 || size < 1) {
-            throw new AppException(ErrorCode.INVALID_PAGINATION);
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
         }
-        int pageRaw = page - 1;
 
-        Pageable pageable = PageRequest.of(pageRaw, size, Sort.by("date").descending());
+    }
 
-        var pageExpense = expenseRepository.findAll(pageable);
+    private void validatePaginate(Pageable pageable) {
+        int page = pageable.getPageNumber();
+        int size = pageable.getPageSize();
+        if (page < 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE);
+        }
 
-        List<ExpenseResponse> expenseResponses = pageExpense.getContent().stream().map(expenseMapper::toExpenseResponse).toList();
+        if (size < 1 || size > 60) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+    }
 
-        return PagingResponse.<ExpenseResponse>builder()
-                .page(page)
-                .size(size)
-                .totalPages(pageExpense.getTotalPages())
-                .totalElements(pageExpense.getTotalElements())
-                .content(expenseResponses)
+
+    public TotalAmountExpenseResponse getTotalAmountByFilter(SumAmountExpenseByIdsRequest request) {
+        List<Long> ids = request.getExpenseIds();
+        if (ids == null || ids.isEmpty()) {
+            return TotalAmountExpenseResponse.builder()
+                    .totalAmount(BigDecimal.ZERO)
+                    .build();
+        }
+
+        BigDecimal totalAmount = expenseRepository.sumAmountByFilter(ids);
+        if (totalAmount == null) {
+            totalAmount = BigDecimal.ZERO;
+        }
+
+        return TotalAmountExpenseResponse.builder()
+                .totalAmount(totalAmount)
                 .build();
     }
+
 }

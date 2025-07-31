@@ -19,7 +19,7 @@ public class Role {
 
     private String description;
 
-    @ManyToMany
+    @ManyToMany (fetch = FetchType.LAZY)
     private Set<Permission> permissions;
 
     private LocalDateTime createdAt;

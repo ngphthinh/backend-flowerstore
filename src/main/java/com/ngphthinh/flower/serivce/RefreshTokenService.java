@@ -22,7 +22,7 @@ public class RefreshTokenService {
     }
 
     public void saveRefreshToken(String refreshToken, String userId) {
-        redis.opsForValue().set(getKey(refreshToken), userId, REFRESHABLE_DURATION, TimeUnit.SECONDS);
+        redis.opsForValue().set(getKey(refreshToken), userId, REFRESHABLE_DURATION, TimeUnit.DAYS);
     }
 
 

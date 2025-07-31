@@ -1,10 +1,9 @@
 package com.ngphthinh.flower.serivce;
 
-import com.ngphthinh.flower.dto.request.UserChangePasswordRequest;
 import com.ngphthinh.flower.dto.request.UserCreationRequest;
 import com.ngphthinh.flower.dto.request.UserAdminUpdateRequest;
+import com.ngphthinh.flower.dto.request.UserUpdateRequest;
 import com.ngphthinh.flower.dto.response.PagingResponse;
-import com.ngphthinh.flower.dto.response.UserChangePasswordResponse;
 import com.ngphthinh.flower.dto.response.UserResponse;
 import com.ngphthinh.flower.entity.Role;
 import com.ngphthinh.flower.entity.Store;
@@ -16,7 +15,6 @@ import com.ngphthinh.flower.repo.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,7 +62,6 @@ public class UserService {
         if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
             throw new AppException(ErrorCode.PHONE_NUMBER_EXISTS);
         }
-
         // get role user
         Role role = roleService.getRoleEntityById(USER_ROLE);
         if (role == null) {
@@ -73,29 +70,32 @@ public class UserService {
         user.setRole(role);
         user.setStore(store);
 
-        log.info("Create user with role default: {}", USER_ROLE);
-
         user.setPassword(passwordEncoder.encode(PASSWORD_DEFAULT));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public PagingResponse<UserResponse> getAllUsers(int page, int size) {
-        if (page < 1 || size < 1) {
-            throw new AppException(ErrorCode.INVALID_PAGINATION);
-        }
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public PagingResponse<UserResponse> getAllUsers(Pageable pageable, String roleName, String phoneNumber) {
 
-        var pageResult = userRepository.findAll(pageable);
+        validatePaginate(pageable);
+
+        if (roleName != null && roleName.isBlank()) {
+            roleName = null;
+        }
+        if (phoneNumber != null && phoneNumber.isBlank()) {
+            phoneNumber = null;
+        }
+
+        var pageResult = userRepository.findAllByPhoneNumberContainingIgnoreCaseOrRoleNameContainingIgnoreCase(phoneNumber, roleName, pageable);
 
         List<UserResponse> userResponses = pageResult.getContent().stream()
                 .map(userMapper::toUserResponse)
                 .toList();
 
         return PagingResponse.<UserResponse>builder()
-                .size(size)
-                .page(page)
+                .size(pageable.getPageSize())
+                .page(pageable.getPageNumber())
                 .totalElements(pageResult.getTotalElements())
                 .totalPages(pageResult.getTotalPages())
                 .content(userResponses)
@@ -119,7 +119,9 @@ public class UserService {
         Store store = storeService.getStoreEntityById(request.getStoreId());
         Role role = roleService.getRoleEntityById(request.getRole());
 
+
         user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
         user.setRole(role);
         user.setStore(store);
         return userMapper.toUserResponse(userRepository.save(user));
@@ -156,5 +158,25 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("#phone == authentication.name")
+    public UserResponse updateProfile(String phone, UserUpdateRequest request){
+        User user = userRepository.findByPhoneNumber(phone)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, phone));
 
+        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName());
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    private void validatePaginate(Pageable pageable) {
+        int page = pageable.getPageNumber();
+        int size = pageable.getPageSize();
+        if (page < 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE);
+        }
+
+        if (size < 1 || size > 60) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+    }
 }

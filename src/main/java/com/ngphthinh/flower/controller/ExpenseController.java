@@ -2,6 +2,7 @@ package com.ngphthinh.flower.controller;
 
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
+import com.ngphthinh.flower.dto.request.SumAmountExpenseByIdsRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.ExpenseResponse;
 import com.ngphthinh.flower.dto.response.PagingResponse;
@@ -9,8 +10,11 @@ import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.ExpenseService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -77,25 +81,34 @@ public class ExpenseController {
                 .build();
     }
 
-    @GetMapping("/date")
-    public ApiResponse<PagingResponse<ExpenseResponse>> getExpenseBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
-        return ApiResponse.<PagingResponse<ExpenseResponse>>builder()
-                .code(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getCode())
-                .message(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getMessage())
-                .data(expenseService.getExpenseBetweenDates(dateRangeRequest))
+    @PostMapping("/total/ids")
+    public ApiResponse<TotalAmountExpenseResponse> getTotalExpenseByIds(@RequestBody SumAmountExpenseByIdsRequest request) {
+        return ApiResponse.<TotalAmountExpenseResponse>builder()
+                .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
+                .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
+                .data(expenseService.getTotalAmountByFilter(request))
                 .build();
     }
 
-    @GetMapping("/paginate")
-    public ApiResponse<PagingResponse<ExpenseResponse>> getAllExpenseWithPaginate(
-            @RequestParam(name = "page", defaultValue = "1", required = false) Integer page,
-            @RequestParam(name = "size", defaultValue = "10", required = false) Integer size) {
+
+
+    @GetMapping("/filter")
+    public ApiResponse<PagingResponse<ExpenseResponse>> getExpenseBetweenDates(
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "expenseType", required = false) String expenseType,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            Pageable pageable
+
+    ) {
         return ApiResponse.<PagingResponse<ExpenseResponse>>builder()
-                .code(ResponseCode.GET_EXPENSES_PAGINATE.getCode())
-                .message(ResponseCode.GET_EXPENSES_PAGINATE.getMessage())
-                .data(expenseService.getAllExpenseWithPaginate(page, size))
+                .code(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getCode())
+                .message(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getMessage())
+                .data(expenseService.getExpensesByFilter(pageable,startDate,endDate, expenseType, searchTerm))
                 .build();
     }
+
+
 
 
 }

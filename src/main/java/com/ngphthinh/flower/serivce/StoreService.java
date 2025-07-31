@@ -7,6 +7,7 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.StoreMapper;
 import com.ngphthinh.flower.repo.StoreRepository;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,25 +23,31 @@ public class StoreService {
     }
 
 
+    @PostAuthorize("hasRole('ADMIN')")
     public StoreResponse createStore(StoreRequest request) {
         Store store = storeMapper.toStore(request);
         return storeMapper.toStoreResponse(storeRepository.save(store));
     }
 
+    @PostAuthorize("hasRole('ADMIN')")
     public StoreResponse getStoreById(Long id) {
         return storeMapper.toStoreResponse(getStoreEntityById(id));
     }
 
+
+    @PostAuthorize("hasAuthority('VIEW_STORE')")
     public List<StoreResponse> getAllStore() {
         return storeRepository.findAll().stream().map(storeMapper::toStoreResponse).toList();
     }
 
+    @PostAuthorize("hasRole('ADMIN')")
     public StoreResponse updateStore(Long id, StoreRequest request) {
         Store store = getStoreEntityById(id);
         storeMapper.updateStoreFormRequest(request, store);
         return storeMapper.toStoreResponse(storeRepository.save(store));
     }
 
+    @PostAuthorize("hasRole('ADMIN')")
     public StoreResponse deleteById(Long id) {
         Store store = getStoreEntityById(id);
         storeRepository.deleteById(id);

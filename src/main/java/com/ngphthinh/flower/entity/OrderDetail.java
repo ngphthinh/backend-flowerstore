@@ -22,11 +22,11 @@ public class OrderDetail {
     private int quantity;
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "product_image_id")
     private ProductImage productImage;
 

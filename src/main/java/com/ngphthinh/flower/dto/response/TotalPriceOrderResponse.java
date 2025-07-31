@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class TotalPriceOrderResponse {
-    private BigDecimal totalAmount;
+    private BigDecimal totalPrice;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 }

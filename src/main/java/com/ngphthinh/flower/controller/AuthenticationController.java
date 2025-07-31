@@ -10,11 +10,10 @@ import com.ngphthinh.flower.dto.response.IntrospectResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.AuthenticationService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.*;
 
+@Log4j2
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
@@ -25,8 +24,14 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
+    @GetMapping("/greeting")
+    public String getGreeting() {
+        return "Hello, welcome to the Flower API!";
+    }
+
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
+        log.info("Received authentication request for phone number: {}", request.getPhoneNumber());
         return ApiResponse.<AuthenticationResponse>builder()
                 .code(ResponseCode.AUTHENTICATED.getCode())
                 .message(ResponseCode.AUTHENTICATED.getMessage())

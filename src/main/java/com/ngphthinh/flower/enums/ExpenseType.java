@@ -5,6 +5,7 @@ public enum ExpenseType {
     SALARY,
     RENT,
     SPENDING,
+    MATERIALS,
     OTHER,;
 
     public static boolean isValid(String type) {

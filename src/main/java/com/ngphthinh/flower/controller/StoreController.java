@@ -30,7 +30,7 @@ public class StoreController {
     }
 
 
-    @GetMapping
+    @GetMapping("/all")
     public ApiResponse<List<StoreResponse>> getAllStores() {
         return ApiResponse.<List<StoreResponse>>builder()
                 .code(ResponseCode.GET_STORE_LIST.getCode())

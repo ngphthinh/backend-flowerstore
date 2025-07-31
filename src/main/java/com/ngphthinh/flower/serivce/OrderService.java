@@ -13,9 +13,13 @@ import com.ngphthinh.flower.entity.Store;
 import com.ngphthinh.flower.enums.DeliveryMethod;
 import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
+import com.ngphthinh.flower.mapper.OrderDetailMapper;
 import com.ngphthinh.flower.mapper.OrderMapper;
 import com.ngphthinh.flower.repo.OrderRepository;
 import jakarta.validation.ConstraintViolation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,10 +35,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
 public class OrderService {
+
+    private static final String ATTRIBUTE_ORDER_DATE = "orderDate";
+    private static final Logger log = LogManager.getLogger(OrderService.class);
 
     private final StoreService storeService;
 
@@ -48,15 +56,16 @@ public class OrderService {
 
     private final OrderDetailService orderDetailService;
 
+    private final OrderDetailMapper orderDetailMapper;
 
-
-    public OrderService(StoreService storeService, Validator validator, OrderRepository orderRepository, ObjectMapper objectMapper, OrderMapper orderMapper, OrderDetailService orderDetailService) {
+    public OrderService(StoreService storeService, Validator validator, OrderRepository orderRepository, ObjectMapper objectMapper, OrderMapper orderMapper, OrderDetailService orderDetailService, OrderDetailMapper orderDetailMapper) {
         this.storeService = storeService;
         this.validator = validator;
         this.orderRepository = orderRepository;
         this.objectMapper = objectMapper;
         this.orderMapper = orderMapper;
         this.orderDetailService = orderDetailService;
+        this.orderDetailMapper = orderDetailMapper;
     }
 
     @PreAuthorize("hasAuthority('CREATE_INVOICE')")
@@ -105,7 +114,7 @@ public class OrderService {
         }
     }
 
-//    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
     public OrderResponse getOrderById(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "id", id.toString()));
         List<OrderDetailResponse> orderDetailResponses = orderDetailService.getOrderDetailsByOrderId(id);
@@ -116,18 +125,77 @@ public class OrderService {
     }
 
 
+    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
+    public PagingResponse<OrderResponse> getAllInvoices(Long storeId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 
+        validatePaginate(pageable);
+
+        validateDateRange(startDate, endDate);
+
+        LocalDateTime startDateTime = Objects.nonNull(startDate) ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = Objects.nonNull(endDate) ? endDate.atTime(LocalTime.MAX) : null;
+
+        Page<Long> paginateOrderId = orderRepository.findAllByStoreIdOrderByOrderDateDesc(storeId, startDateTime, endDateTime, pageable);
+
+        List<OrderResponse> orderResponses = orderRepository.findOrderWithOrderDetailByIds(paginateOrderId.getContent()).stream()
+                .map(order -> {
+                    OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+                    List<OrderDetailResponse> orderDetailResponses = order.getOrderDetails().stream()
+                            .map(orderDetailMapper::toOrderDetailResponse).toList();
+                    orderResponse.setOrderDetailResponses(orderDetailResponses);
+                    return orderResponse;
+                }).toList();
+
+        return PagingResponse.<OrderResponse>builder()
+                .content(orderResponses)
+                .totalElements(paginateOrderId.getTotalElements())
+                .totalPages(paginateOrderId.getTotalPages())
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .build();
+    }
 
     @PreAuthorize("hasAuthority('VIEW_INVOICE')")
-    public List<OrderResponse> getAllInvoices() {
+    public PagingResponse<OrderResponse> getAllInvoicesByCustomerNameOrCustomerPhoneOrIdContainIgnoreCase(String inputKey, Pageable pageable) {
 
-        List<OrderResponse> orderResponses = orderRepository.findAll().stream()
-                .map(orderMapper::toOrderResponse).toList();
+        validatePaginate(pageable);
+        Page<Long> paginateOrderId = orderRepository.findAllByOrCustomerPhoneContainingIgnoreCaseOrCustomerNameContainingIgnoreCase(inputKey, pageable);
 
-        orderResponses.forEach(e ->
-                e.setOrderDetailResponses(orderDetailService.getOrderDetailsByOrderId(e.getOrderId()))
-        );
-        return orderResponses;
+        List<OrderResponse> orderResponses = orderRepository.findOrderWithOrderDetailByIds(paginateOrderId.getContent()).stream()
+                .map(order -> {
+                    List<OrderDetailResponse> orderDetailResponses = order.getOrderDetails().stream()
+                            .map(orderDetailMapper::toOrderDetailResponse).toList();
+                    OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+                    orderResponse.setOrderDetailResponses(orderDetailResponses);
+                    return orderResponse;
+                }).toList();
+
+        return PagingResponse.<OrderResponse>builder()
+                .content(orderResponses)
+                .totalPages(paginateOrderId.getTotalPages())
+                .totalElements(paginateOrderId.getTotalElements())
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .build();
+    }
+
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+                throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+            }
+
+    }
+
+    private void validatePaginate(Pageable pageable) {
+        int size = pageable.getPageSize();
+        int page = pageable.getPageNumber();
+        if (page < 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE);
+        }
+
+        if (size < 1 || size > 60) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
     }
 
     @PreAuthorize("hasAuthority('VIEW_INVOICE')")
@@ -190,7 +258,7 @@ public class OrderService {
 
         BigDecimal totalPriceByDateBetween = orderRepository.sumTotalPriceByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
         return TotalPriceOrderResponse.builder()
-                .totalAmount(totalPriceByDateBetween)
+                .totalPrice(totalPriceByDateBetween)
                 .startDate(startDate)
                 .endDate(endDate)
                 .build();
@@ -206,7 +274,7 @@ public class OrderService {
                 .orElse(BigDecimal.ZERO);
 
         return TotalPriceOrderResponse.builder()
-                .totalAmount(totalPriceByStoreIdAndOrderDateBetween)
+                .totalPrice(totalPriceByStoreIdAndOrderDateBetween)
                 .startDate(startDate)
                 .endDate(endDate)
                 .build();
@@ -228,7 +296,7 @@ public class OrderService {
             throw new AppException(ErrorCode.INVALID_DATE_RANGE);
         }
 
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("orderDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(ATTRIBUTE_ORDER_DATE).descending());
 
         var orderPage = orderRepository.findOrdersByOrderDateBetween(startDate, enDate, pageable);
 
@@ -254,7 +322,7 @@ public class OrderService {
 
         int pageRaw = page - 1;
 
-        Pageable pageable = PageRequest.of(pageRaw, size, Sort.by("orderDate").descending());
+        Pageable pageable = PageRequest.of(pageRaw, size, Sort.by(ATTRIBUTE_ORDER_DATE).descending());
 
         var orderPage = orderRepository.findAll(pageable);
 
@@ -290,29 +358,33 @@ public class OrderService {
                 .orElse(BigDecimal.ZERO);
 
         return TotalPriceOrderResponse.builder()
-                .totalAmount(totalPriceByStoreIdAndOrderDateBetween)
+                .totalPrice(totalPriceByStoreIdAndOrderDateBetween)
                 .startDate(startDate)
                 .endDate(endDate)
                 .build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public TotalPriceOrderResponse getTotalPriceByStoreIdAndDate(Long storeId, LocalDate date) {
+    public TotalPriceOrderResponse getTotalPriceByStoreIdAndDate(Long storeId, LocalDate startDate, LocalDate endDate) {
 
-        LocalDateTime startDate = date.atStartOfDay();
-        LocalDateTime endDate = date.atTime(LocalTime.MAX);
-        if (!storeService.isStoreExist(storeId)) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+
+        if ( storeId != null && !storeService.isStoreExist(storeId)) {
             throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
         }
 
+        log.info("store id {}", storeId);
+
         BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
-                .sumTotalPriceByStoreIdAndOrderDateBetween(storeId, startDate, endDate)
+                .sumTotalPriceByStoreIdAndOrderDateBetween(storeId, startDateTime, endDateTime)
                 .orElse(BigDecimal.ZERO);
 
         return TotalPriceOrderResponse.builder()
-                .totalAmount(totalPriceByStoreIdAndOrderDateBetween)
-                .startDate(startDate)
-                .endDate(endDate)
+                .totalPrice(totalPriceByStoreIdAndOrderDateBetween)
+                .startDate(startDateTime)
+                .endDate(endDateTime)
                 .build();
     }
 }

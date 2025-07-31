@@ -1,27 +1,31 @@
 package com.ngphthinh.flower;
 
 
-import com.ngphthinh.flower.dto.request.RefreshTokenRequest;
-import com.ngphthinh.flower.serivce.RefreshTokenService;
-import com.ngphthinh.flower.serivce.TokenBlackListService;
+import com.ngphthinh.flower.repo.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 
 @SpringBootTest
 class BackendFlowerShopApplicationTests {
 
     @Autowired
-    RefreshTokenService refreshTokenService;
+    OrderRepository repository;
 
     @Test
     void contextLoads() {
-        refreshTokenService.saveRefreshToken("refreshTokenTest","1");
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("orderDate").descending());
 
-        System.out.println( "User id: "+refreshTokenService.getUserId("refreshTokenTest"));
+        String inputText = "0";
 
-//        refreshTokenService.deleteRefreshToken("refreshTokenTest");
+        Page<Long> pageId = repository.findAllByOrCustomerPhoneContainingIgnoreCaseOrCustomerNameContainingIgnoreCase(inputText, pageable);
+
+        System.out.println(pageId.getContent());
 
     }
 

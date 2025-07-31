@@ -25,7 +25,6 @@ public class SecurityConfig {
 
     private static final String[] ADMIN_ENDPOINTS = {
             "/api/v1/expense/**",
-            "/api/v1/store/**"
     };
 
 
@@ -46,9 +45,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorize ->
                 authorize.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/report/**").permitAll()
-
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole(ROLE_ADMIN)
-
                         .anyRequest().authenticated()
         );
 
@@ -83,8 +80,7 @@ public class SecurityConfig {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.addAllowedOrigin("http://localhost:3000");
-//        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
 

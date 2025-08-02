@@ -3,10 +3,7 @@ package com.ngphthinh.flower.controller;
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.request.SumAmountExpenseByIdsRequest;
-import com.ngphthinh.flower.dto.response.ApiResponse;
-import com.ngphthinh.flower.dto.response.ExpenseResponse;
-import com.ngphthinh.flower.dto.response.PagingResponse;
-import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
+import com.ngphthinh.flower.dto.response.*;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.ExpenseService;
 import jakarta.validation.Valid;
@@ -73,11 +70,11 @@ public class ExpenseController {
     }
 
     @GetMapping("/total")
-    public ApiResponse<TotalAmountExpenseResponse> getTotalExpenseBetweenDates(@RequestBody DateRangeRequest dateRangeRequest) {
+    public ApiResponse<TotalAmountExpenseResponse> getTotalExpenseBetweenDates(@RequestParam String stateStatisticsDay) {
         return ApiResponse.<TotalAmountExpenseResponse>builder()
                 .code(ResponseCode.GET_TOTAL_EXPENSE.getCode())
                 .message(ResponseCode.GET_TOTAL_EXPENSE.getMessage())
-                .data(expenseService.getTotalAmountExpenseBetweenDates(dateRangeRequest))
+                .data(expenseService.getTotalAmountExpenseByState(stateStatisticsDay))
                 .build();
     }
 
@@ -89,7 +86,6 @@ public class ExpenseController {
                 .data(expenseService.getTotalAmountByFilter(request))
                 .build();
     }
-
 
 
     @GetMapping("/filter")
@@ -104,11 +100,19 @@ public class ExpenseController {
         return ApiResponse.<PagingResponse<ExpenseResponse>>builder()
                 .code(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getCode())
                 .message(ResponseCode.GET_EXPENSE_BETWEEN_DATE.getMessage())
-                .data(expenseService.getExpensesByFilter(pageable,startDate,endDate, expenseType, searchTerm))
+                .data(expenseService.getExpensesByFilter(pageable, startDate, endDate, expenseType, searchTerm))
                 .build();
     }
 
-
-
+    @GetMapping("/statistics")
+    public ApiResponse<List<ExpenseStatisticsResponse>> getExpenseStatisticsByDate(
+            @RequestParam String stateStatisticsDay
+    ) {
+        return ApiResponse.<List<ExpenseStatisticsResponse>>builder()
+                .code(ResponseCode.GET_EXPENSE_STATISTICS.getCode())
+                .message(ResponseCode.GET_EXPENSE_STATISTICS.getMessage())
+                .data(expenseService.getTotalExpenseByState(stateStatisticsDay))
+                .build();
+    }
 
 }

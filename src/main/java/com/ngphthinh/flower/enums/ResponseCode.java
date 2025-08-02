@@ -28,7 +28,7 @@ public enum ResponseCode {
     GET_TOTAL_EXPENSE(200, "Total expense retrieved successfully"),
     GET_EXPENSES_PAGINATE(200, "Expense list retrieved successfully with pagination"),
     GET_EXPENSE_BETWEEN_DATE(200, "Expense list retrieved successfully between dates"),
-    GET_EXPENSE_BY_TYPE(200, "Expense list retrieved successfully by type"),
+    GET_EXPENSE_STATISTICS (200, "Expense statistics retrieved successfully"),
 
     CREATE_USER(201, "User created successfully"),
     GET_USER_LIST(200, "User list retrieved successfully"),
@@ -44,6 +44,7 @@ public enum ResponseCode {
 
     REFRESHED(200, "Token refreshed successfully"),
     GET_MY_PROFILE(200, "User profile retrieved successfully"),
+    GET_STORE_STATISTICS(200, "Store statistics retrieved successfully")
     ;
 
 

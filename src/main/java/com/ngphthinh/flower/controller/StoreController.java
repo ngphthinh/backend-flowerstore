@@ -3,11 +3,14 @@ package com.ngphthinh.flower.controller;
 import com.ngphthinh.flower.dto.request.StoreRequest;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.StoreResponse;
+import com.ngphthinh.flower.dto.response.StoreStatisticsResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.StoreService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -65,5 +68,26 @@ public class StoreController {
                 .data(storeService.updateStore(id, request))
                 .build();
     }
+
+    @GetMapping("/statistics")
+    public ApiResponse<List<StoreStatisticsResponse>> getStoreStatistics(@RequestParam String stateStatisticsDay) {
+        return ApiResponse.<List<StoreStatisticsResponse>>builder()
+                .code(ResponseCode.GET_STORE_STATISTICS.getCode())
+                .message(ResponseCode.GET_STORE_STATISTICS.getMessage())
+                .data(storeService.getStoreStatistics(stateStatisticsDay))
+                .build();
+    }
+
+    @GetMapping("/statistics/all")
+    public ApiResponse<StoreStatisticsResponse> getStoreStatisticsAll(
+            @RequestParam String stateStatisticsDay) {
+        return ApiResponse.<StoreStatisticsResponse>builder()
+                .code(ResponseCode.GET_STORE_STATISTICS.getCode())
+                .message(ResponseCode.GET_STORE_STATISTICS.getMessage())
+                .data(storeService.getStoreStatisticsAll(stateStatisticsDay))
+                .build();
+    }
+
+
 
 }

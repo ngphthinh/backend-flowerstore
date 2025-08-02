@@ -1,5 +1,6 @@
 package com.ngphthinh.flower.repo;
 
+import com.ngphthinh.flower.dto.response.OrderTotalByDateResponse;
 import com.ngphthinh.flower.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,14 +20,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findOrdersByOrderDateBetween(LocalDateTime orderDateAfter, LocalDateTime orderDateBefore, Pageable pageable);
 
-    Page<Order> findAllByStoreIdAndOrderDateBetween(Long storeId, LocalDateTime orderDateAfter, LocalDateTime orderDateBefore, Pageable pageable);
 
     @Query("SELECT SUM(o.totalPrice) FROM Order o WHERE (o.store.id = :storeId or :storeId is null ) AND o.orderDate BETWEEN :startDate AND :endDate")
     Optional<BigDecimal> sumTotalPriceByStoreIdAndOrderDateBetween(Long storeId, LocalDateTime startDate, LocalDateTime endDate);
 
-    Optional<Integer> countOrderByOrderDateBetweenAndStoreId(LocalDateTime orderDateAfter, LocalDateTime orderDateBefore, Long storeId);
-
-    Optional<Integer> countOrderByOrderDateBetween(LocalDateTime orderDateAfter, LocalDateTime orderDateBefore);
 
     @Query("""
     SELECT o.orderId FROM Order o
@@ -50,14 +47,36 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
 
     @Query("""
-        select o.orderId from Order o 
-        where 
-             upper(o.customerPhone) like upper(concat('%', :inputKey, '%')) 
+        select o.orderId from Order o
+        where
+             upper(o.customerPhone) like upper(concat('%', :inputKey, '%'))
             or upper(o.customerName) like upper(concat('%', :inputKey, '%'))
-        order by o.orderDate desc 
+        order by o.orderDate desc
     """)
     Page<Long> findAllByOrCustomerPhoneContainingIgnoreCaseOrCustomerNameContainingIgnoreCase(String inputKey, Pageable pageable);
 
+    @Query("""
+            select new com.ngphthinh.flower.dto.response.OrderTotalByDateResponse (
+                    cast(CAST(o.orderDate AS localdate) as string),
+                    cast( sum(o.totalPrice) as bigdecimal),
+                    count(o.orderId))
+            from Order o
+            where o.orderDate between :startDate and :endDate
+            group by cast(CAST(o.orderDate AS localdate) as string)
+            order by cast(CAST(o.orderDate AS localdate) as string) asc
+            """)
+   List<OrderTotalByDateResponse> findTotalByOrderDate(LocalDateTime startDate, LocalDateTime endDate);
 
+    @Query("""
+        select new com.ngphthinh.flower.dto.response.OrderTotalByDateResponse (
+                Cast(FUNCTION('QUARTER', o.orderDate) as string),
+                cast(sum(o.totalPrice) as bigdecimal ),
+                count (o.orderId))
+        from Order o
+        where FUNCTION('YEAR', o.orderDate) = FUNCTION('YEAR', :now)
+        group by CAST(FUNCTION('QUARTER', o.orderDate) AS string)
+        order by CAST(FUNCTION('QUARTER', o.orderDate) AS string) asc
+        """)
+    List<OrderTotalByDateResponse> findTotalByQuarter( LocalDateTime now);
 
 }

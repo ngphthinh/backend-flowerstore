@@ -1,11 +1,10 @@
 package com.ngphthinh.flower.serivce;
 
+import com.ngphthinh.flower.constant.Constant;
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.request.SumAmountExpenseByIdsRequest;
-import com.ngphthinh.flower.dto.response.ExpenseResponse;
-import com.ngphthinh.flower.dto.response.PagingResponse;
-import com.ngphthinh.flower.dto.response.TotalAmountExpenseResponse;
+import com.ngphthinh.flower.dto.response.*;
 import com.ngphthinh.flower.entity.Expense;
 import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
@@ -20,8 +19,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ExpenseService {
@@ -153,4 +158,106 @@ public class ExpenseService {
                 .build();
     }
 
+    public TotalAmountExpenseResponse getTotalAmountExpenseByState(String stateStatisticsDay) {
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        switch (stateStatisticsDay) {
+            case "TODAY" -> {
+                startDate = LocalDate.now().atStartOfDay();
+                endDate = LocalDate.now().atTime(LocalTime.MAX);
+            }
+            case "DAY_7" -> {
+                startDate = LocalDate.now().minusDays(7).atStartOfDay();
+                endDate = LocalDate.now().atTime(LocalTime.MAX);
+            }
+            case "DAY_30" -> {
+                startDate = LocalDate.now().minusDays(30).atStartOfDay();
+                endDate = LocalDate.now().atTime(LocalTime.MAX);
+            }
+            case "DAY_365" -> {
+                startDate = LocalDate.now().minusYears(1).atStartOfDay();
+                endDate = LocalDate.now().atTime(LocalTime.MAX);
+            }
+            default ->
+                    throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
+        }
+
+        BigDecimal totalAmountExpense = expenseRepository.sumAmountByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
+
+        return TotalAmountExpenseResponse.builder()
+                .totalAmount(totalAmountExpense)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+    }
+
+
+    public List<ExpenseStatisticsResponse> getTotalExpenseByState(String stateStatisticsDay) {
+        if (stateStatisticsDay == null || stateStatisticsDay.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
+        }
+
+        List<ExpenseStatisticsResponse> totalByExpenseDate;
+
+        if (stateStatisticsDay.equals("TODAY") || stateStatisticsDay.equals("DAY_7") || stateStatisticsDay.equals("DAY_30")) {
+            LocalDateTime startDate = LocalDate.now().minusDays(7).atStartOfDay();
+            LocalDateTime endDate = LocalDate.now().atTime(LocalTime.MAX);
+
+            totalByExpenseDate = mapMissingDates(expenseRepository.findExpenseStatisticsByDate(startDate, endDate));//, startDate.toLocalDate(), endDate.toLocalDate());
+        } else if (stateStatisticsDay.equals("DAY_365")) {
+            totalByExpenseDate = mapMissingQuarter( expenseRepository.findExpenseStatisticsQuarter(LocalDateTime.now()));
+        } else {
+            throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
+        }
+        return totalByExpenseDate;
+    }
+
+    private List<ExpenseStatisticsResponse> mapMissingQuarter(List<ExpenseStatisticsResponse> totalByExpenseDate) {
+        Map<String, ExpenseStatisticsResponse> existingMap = totalByExpenseDate.stream()
+                .collect(Collectors.toMap(ExpenseStatisticsResponse::getDate, Function.identity()));
+        String []  quarters = {"1", "2", "3", "4"};
+        return Stream.of(quarters).map(
+                quarter -> {
+                    ExpenseStatisticsResponse existing = existingMap.get(quarter);
+                    if (existing != null) {
+                        return existing;
+                    } else {
+                        return ExpenseStatisticsResponse.builder()
+                                .date(quarter)
+                                .totalAmount(BigDecimal.ZERO)
+                                .averageAmount(BigDecimal.ZERO)
+                                .build();
+                    }
+                }
+        ).toList();
+    }
+
+
+    private List<ExpenseStatisticsResponse> mapMissingDates(List<ExpenseStatisticsResponse> totalByExpenseDate) {
+        Map<LocalDate, ExpenseStatisticsResponse> existingMap = totalByExpenseDate.stream()
+                .collect(Collectors.toMap(date -> LocalDate.parse(date.getDate()), Function.identity()));
+
+        List<LocalDate> last7Days = Stream.iterate(LocalDate.now().minusDays(6), date -> date.plusDays(1))
+                .limit(7)
+                .toList();
+        return last7Days .stream().map(
+                date -> {
+                    ExpenseStatisticsResponse existing  = existingMap.get(date);
+                    if (existing != null) {
+                        return ExpenseStatisticsResponse.builder()
+                                .date(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.forLanguageTag(Constant.VIETNAMESE)))
+                                .totalAmount(existing.getTotalAmount())
+                                .averageAmount(existing.getAverageAmount())
+                                .build();
+                    } else {
+                        return ExpenseStatisticsResponse.builder()
+                                .date(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.forLanguageTag(Constant.VIETNAMESE)))
+                                .totalAmount(BigDecimal.ZERO)
+                                .averageAmount(BigDecimal.ZERO)
+                                .build();
+                    }
+                }
+        ).toList();
+    }
 }

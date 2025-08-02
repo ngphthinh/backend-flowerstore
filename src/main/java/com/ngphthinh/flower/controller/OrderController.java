@@ -2,10 +2,7 @@ package com.ngphthinh.flower.controller;
 
 import com.ngphthinh.flower.dto.request.CreateOrderBaseRequest;
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
-import com.ngphthinh.flower.dto.response.ApiResponse;
-import com.ngphthinh.flower.dto.response.OrderResponse;
-import com.ngphthinh.flower.dto.response.PagingResponse;
-import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
+import com.ngphthinh.flower.dto.response.*;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.serivce.OrderService;
@@ -167,5 +164,14 @@ public class OrderController {
                 .build();
     }
 
-
+    @GetMapping("/statistics/price")
+    public ApiResponse<List<OrderTotalByDateResponse>> getOrderTotalByDate(
+            @RequestParam String stateStatisticsDay
+        ) {
+        return ApiResponse.<List<OrderTotalByDateResponse>>builder()
+                .code(ResponseCode.GET_TOTAL_ORDER_DATE.getCode())
+                .message(ResponseCode.GET_TOTAL_ORDER_DATE.getMessage())
+                .data(orderService.getTotalByOrderDate(stateStatisticsDay))
+                .build();
+    }
 }

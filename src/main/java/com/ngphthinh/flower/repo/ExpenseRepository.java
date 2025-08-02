@@ -1,5 +1,6 @@
 package com.ngphthinh.flower.repo;
 
+import com.ngphthinh.flower.dto.response.ExpenseStatisticsResponse;
 import com.ngphthinh.flower.entity.Expense;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,26 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     """)
     BigDecimal sumAmountByFilter(List<Long> ids);
 
+    @Query("""
+        select new com.ngphthinh.flower.dto.response.ExpenseStatisticsResponse(
+            cast(CAST(e.date AS localdate) as string),
+            cast(sum(e.amount) as bigdecimal ),
+            cast(avg(e.amount) as bigdecimal))
+        from Expense e
+        where e.date between :startDate and :endDate
+        group by cast(CAST(e.date AS localdate) as string)
+        order by cast(CAST(e.date AS localdate) as string)
+    """)
+    List<ExpenseStatisticsResponse> findExpenseStatisticsByDate(LocalDateTime startDate, LocalDateTime endDate);
 
-    Page<Expense> findAllByExpenseType(String expenseType, Pageable pageable);
+    @Query("""
+        select new com.ngphthinh.flower.dto.response.ExpenseStatisticsResponse(
+            Cast(FUNCTION('QUARTER', e.date) as string),
+            cast(sum(e.amount) as bigdecimal ),
+            cast(avg(e.amount) as bigdecimal))
+        from Expense e
+        group by Cast(FUNCTION('QUARTER', e.date) as string)
+        order by Cast(FUNCTION('QUARTER', e.date) as string)
+    """)
+    List<ExpenseStatisticsResponse> findExpenseStatisticsQuarter(LocalDateTime now);
 }

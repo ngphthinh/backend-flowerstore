@@ -70,7 +70,8 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(1327, "Refresh token must not be empty", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(1328, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_EXPENSE_TYPE(1329, "Expense type doesn't exist", HttpStatus.BAD_REQUEST),
-    INVALID_EMAIL_REGEX(1330, "Email must be in the format", HttpStatus.BAD_REQUEST)
+    INVALID_EMAIL_REGEX(1330, "Email must be in the format", HttpStatus.BAD_REQUEST),
+    INVALID_STATE_STATISTICS_DAY(1331, "State statistics day must be invalid with parameter : {stateStatisticsDay}", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

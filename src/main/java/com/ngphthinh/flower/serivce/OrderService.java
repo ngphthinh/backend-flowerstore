@@ -1,13 +1,11 @@
 package com.ngphthinh.flower.serivce;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ngphthinh.flower.constant.Constant;
 import com.ngphthinh.flower.dto.request.CreateOrderBaseRequest;
 import com.ngphthinh.flower.dto.request.CreateOrderRequest;
 import com.ngphthinh.flower.dto.request.DateRangeRequest;
-import com.ngphthinh.flower.dto.response.OrderDetailResponse;
-import com.ngphthinh.flower.dto.response.OrderResponse;
-import com.ngphthinh.flower.dto.response.PagingResponse;
-import com.ngphthinh.flower.dto.response.TotalPriceOrderResponse;
+import com.ngphthinh.flower.dto.response.*;
 import com.ngphthinh.flower.entity.Order;
 import com.ngphthinh.flower.entity.Store;
 import com.ngphthinh.flower.enums.DeliveryMethod;
@@ -33,10 +31,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.time.format.TextStyle;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 @Service
 public class OrderService {
@@ -181,8 +181,8 @@ public class OrderService {
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-                throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-            }
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
 
     }
 
@@ -371,7 +371,7 @@ public class OrderService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
 
-        if ( storeId != null && !storeService.isStoreExist(storeId)) {
+        if (storeId != null && !storeService.isStoreExist(storeId)) {
             throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
         }
 
@@ -386,5 +386,76 @@ public class OrderService {
                 .startDate(startDateTime)
                 .endDate(endDateTime)
                 .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderTotalByDateResponse> getTotalByOrderDate(String stateStatisticsDay) {
+        if (stateStatisticsDay == null || stateStatisticsDay.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
+        }
+
+        List<OrderTotalByDateResponse> totalByOrderDate;
+
+        if (stateStatisticsDay.equals("TODAY") || stateStatisticsDay.equals("DAY_7") || stateStatisticsDay.equals("DAY_30")) {
+            LocalDateTime startDate = LocalDate.now().minusDays(7).atStartOfDay();
+            LocalDateTime endDate = LocalDate.now().atTime(LocalTime.MAX);
+
+            totalByOrderDate = mapMissingDates(orderRepository.findTotalByOrderDate(startDate, endDate));//, startDate.toLocalDate(), endDate.toLocalDate());
+        } else if (stateStatisticsDay.equals("DAY_365")) {
+            totalByOrderDate = mapMissingQuarter( orderRepository.findTotalByQuarter(LocalDateTime.now()));
+        } else {
+            throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
+        }
+
+
+        return totalByOrderDate;
+    }
+
+    private List<OrderTotalByDateResponse> mapMissingQuarter(List<OrderTotalByDateResponse> totalByOrderDate) {
+        Map<String, OrderTotalByDateResponse> existingMap = totalByOrderDate.stream()
+                .collect(Collectors.toMap(OrderTotalByDateResponse::getDate, Function.identity()));
+        String []  quarters = {"1", "2", "3", "4"};
+        return Stream.of(quarters).map(
+                quarter -> {
+                    OrderTotalByDateResponse existing = existingMap.get(quarter);
+                    if (existing != null) {
+                        return existing;
+                    } else {
+                        return OrderTotalByDateResponse.builder()
+                                .date(quarter)
+                                .totalAmount(BigDecimal.ZERO)
+                                .totalOrders(0L)
+                                .build();
+                    }
+                }
+        ).toList();
+    }
+
+
+    private List<OrderTotalByDateResponse> mapMissingDates(List<OrderTotalByDateResponse> totalByOrderDate) {
+        Map<LocalDate, OrderTotalByDateResponse> existingMap = totalByOrderDate.stream()
+                .collect(Collectors.toMap(date -> LocalDate.parse(date.getDate()), Function.identity()));
+
+        List<LocalDate> last7Days = Stream.iterate(LocalDate.now().minusDays(6), date -> date.plusDays(1))
+                .limit(7)
+                .toList();
+        return last7Days .stream().map(
+                date -> {
+                    OrderTotalByDateResponse existing  = existingMap.get(date);
+                    if (existing != null) {
+                        return OrderTotalByDateResponse.builder()
+                                .date(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.forLanguageTag(Constant.VIETNAMESE)))
+                                .totalAmount(existing.getTotalAmount())
+                                .totalOrders(existing.getTotalOrders())
+                                .build();
+                    } else {
+                        return OrderTotalByDateResponse.builder()
+                                .date(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.forLanguageTag(Constant.VIETNAMESE)))
+                                .totalAmount(BigDecimal.ZERO)
+                                .totalOrders(0L)
+                                .build();
+                    }
+                }
+        ).toList();
     }
 }

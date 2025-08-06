@@ -10,9 +10,11 @@ import com.ngphthinh.flower.repo.StoreRepository;
 import com.ngphthinh.flower.repo.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -23,11 +25,10 @@ public class AppInitConfig {
 
     private static final Logger log = LogManager.getLogger(AppInitConfig.class);
 
-//    private final PasswordEncoder passwordEncoder;
+    @Value("${flower.default.admin-password}")
+    private String defaultAdminPassword;
 
-//    public AppInitConfig(PasswordEncoder passwordEncoder) {
-//        this.passwordEncoder = passwordEncoder;
-//    }
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     ApplicationRunner applicationRunner(StoreRepository storeRepository, PermissionRepository permissionRepository, RoleRepository roleRepository, UserRepository userRepository) {
@@ -74,16 +75,22 @@ public class AppInitConfig {
                 roleRepository.saveAll(List.of(adminRole, userRole));
                 log.info("Default roles added to database for testing");
             }
-//            if (!userRepository.existsByPhoneNumber("0000000000")) {
-//                User adminUser = User.builder()
-//                        .phoneNumber("0000000000")
-//                        .password(passwordEncoder.encode("Admin@123"))
-//                        .store(storeRepository.findById(1L).orElse(null))
-//                        .role(roleRepository.findById("ADMIN").orElse(null))
-//                        .build();
-//                userRepository.save(adminUser);
-//                log.info("Default user added to database for testing");
-//            }
+            if (!userRepository.existsByPhoneNumber("0000000000")) {
+
+
+                passwordEncoder = new BCryptPasswordEncoder(12);
+
+
+
+                User adminUser = User.builder()
+                        .phoneNumber("0000000000")
+                        .password(passwordEncoder.encode(defaultAdminPassword))
+                        .store(storeRepository.findById(1L).orElse(null))
+                        .role(roleRepository.findById("ADMIN").orElse(null))
+                        .build();
+                userRepository.save(adminUser);
+                log.info("Default user added to database for testing");
+            }
         };
     }
 }

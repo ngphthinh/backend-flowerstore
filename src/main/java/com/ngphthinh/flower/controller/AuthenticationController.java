@@ -1,12 +1,10 @@
 package com.ngphthinh.flower.controller;
 
-import com.ngphthinh.flower.dto.request.AuthenticationRequest;
-import com.ngphthinh.flower.dto.request.IntrospectRequest;
-import com.ngphthinh.flower.dto.request.LogoutRequest;
-import com.ngphthinh.flower.dto.request.RefreshTokenRequest;
+import com.ngphthinh.flower.dto.request.*;
 import com.ngphthinh.flower.dto.response.ApiResponse;
 import com.ngphthinh.flower.dto.response.AuthenticationResponse;
 import com.ngphthinh.flower.dto.response.IntrospectResponse;
+import com.ngphthinh.flower.dto.response.UserChangePasswordResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.AuthenticationService;
 import jakarta.validation.Valid;
@@ -22,11 +20,6 @@ public class AuthenticationController {
 
     public AuthenticationController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
-    }
-
-    @GetMapping("/greeting")
-    public String getGreeting() {
-        return "Hello, welcome to the Flower API!";
     }
 
     @PostMapping("/login")
@@ -63,6 +56,15 @@ public class AuthenticationController {
                 .code(ResponseCode.REFRESHED.getCode())
                 .message(ResponseCode.REFRESHED.getMessage())
                 .data(authenticationService.refreshToken(request))
+                .build();
+    }
+
+    @PostMapping("/change-password")
+    public ApiResponse<UserChangePasswordResponse> changePassword(@Valid @RequestBody UserChangePasswordRequest request){
+        return ApiResponse.<UserChangePasswordResponse>builder()
+                .code(ResponseCode.CHANGE_PASSWORD.getCode())
+                .message(ResponseCode.CHANGE_PASSWORD.getMessage())
+                .data(authenticationService.changePassword(request))
                 .build();
     }
 

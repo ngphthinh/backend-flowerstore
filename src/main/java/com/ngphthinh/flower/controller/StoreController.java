@@ -7,10 +7,8 @@ import com.ngphthinh.flower.dto.response.StoreStatisticsResponse;
 import com.ngphthinh.flower.enums.ResponseCode;
 import com.ngphthinh.flower.serivce.StoreService;
 import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -52,7 +50,7 @@ public class StoreController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<StoreResponse> updateStore(@PathVariable("id") Long id) {
+    public ApiResponse<StoreResponse> deleteStore(@PathVariable("id") Long id) {
         return ApiResponse.<StoreResponse>builder()
                 .code(ResponseCode.DELETE_STORE.getCode())
                 .message(ResponseCode.DELETE_STORE.getMessage())

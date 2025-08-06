@@ -8,12 +8,11 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.StoreMapper;
 import com.ngphthinh.flower.repo.StoreRepository;
+import com.ngphthinh.flower.util.DateRange;
+import com.ngphthinh.flower.util.StatisticsUtil;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -72,33 +71,9 @@ public class StoreService {
 
     public List<StoreStatisticsResponse> getStoreStatistics(String stateStatisticsDay) {
 
-        LocalDateTime startDate;
-        LocalDateTime endDate;
+        DateRange dateRange = StatisticsUtil.getDateRange(stateStatisticsDay);
 
-
-        switch (stateStatisticsDay) {
-            case "TODAY" -> {
-                startDate = LocalDate.now().atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_7" -> {
-                startDate = LocalDate.now().minusDays(7).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_30" -> {
-                startDate = LocalDate.now().minusDays(30).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_365" -> {
-                startDate = LocalDate.now().minusYears(1).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            default ->
-                    throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
-
-        }
-
-        var storeStatistics = storeRepository.getStoreStatistics(startDate, endDate);
+        var storeStatistics = storeRepository.getStoreStatistics(dateRange.getStartDate(), dateRange.getEndDate());
         if (storeStatistics.isEmpty()) {
             return storeRepository.findAll().stream().map(
                     store -> new StoreStatisticsResponse(
@@ -112,33 +87,8 @@ public class StoreService {
     }
     public StoreStatisticsResponse getStoreStatisticsAll(String stateStatisticsDay) {
 
-        LocalDateTime startDate;
-        LocalDateTime endDate;
-
-
-        switch (stateStatisticsDay) {
-            case "TODAY" -> {
-                startDate = LocalDate.now().atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_7" -> {
-                startDate = LocalDate.now().minusDays(7).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_30" -> {
-                startDate = LocalDate.now().minusDays(30).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_365" -> {
-                startDate = LocalDate.now().minusYears(1).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            default ->
-                    throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
-
-        }
-
-        return storeRepository.getStoreStatisticsAll(startDate, endDate);
+        DateRange dateRange = StatisticsUtil.getDateRange(stateStatisticsDay);
+        return storeRepository.getStoreStatisticsAll(dateRange.getStartDate(), dateRange.getEndDate());
 
     }
 

@@ -1,5 +1,8 @@
-package com.ngphthinh.flower.constant;
+package com.ngphthinh.flower.util;
 
 public class Constant {
     public static final String VIETNAMESE = "vi";
+
+    private Constant() {
+    }
 }

@@ -1,6 +1,5 @@
 package com.ngphthinh.flower.controller;
 
-import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.request.SumAmountExpenseByIdsRequest;
 import com.ngphthinh.flower.dto.response.*;
@@ -30,24 +29,6 @@ public class ExpenseController {
                 .code(ResponseCode.CREATE_EXPENSE.getCode())
                 .message(ResponseCode.CREATE_EXPENSE.getMessage())
                 .data(expenseService.createExpense(expenseRequest))
-                .build();
-    }
-
-    @GetMapping
-    public ApiResponse<List<ExpenseResponse>> getAllExpenses() {
-        return ApiResponse.<List<ExpenseResponse>>builder()
-                .code(ResponseCode.GET_EXPENSE_LIST.getCode())
-                .message(ResponseCode.GET_EXPENSE_LIST.getMessage())
-                .data(expenseService.getAllExpenses())
-                .build();
-    }
-
-    @GetMapping("/{id}")
-    public ApiResponse<ExpenseResponse> getExpenseById(@PathVariable("id") Long id) {
-        return ApiResponse.<ExpenseResponse>builder()
-                .code(ResponseCode.GET_EXPENSE.getCode())
-                .message(ResponseCode.GET_EXPENSE.getMessage())
-                .data(expenseService.getExpenseById(id))
                 .build();
     }
 

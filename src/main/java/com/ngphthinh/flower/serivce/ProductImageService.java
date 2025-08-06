@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -62,8 +64,14 @@ public class ProductImageService {
     public void deleteImage(String publicId) {
         try {
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            productImageRepository.deleteByPublicId(publicId);
         } catch (IOException e) {
             throw new AppException(ErrorCode.DELETE_IMAGE_FAILED);
         }
+    }
+
+    public List<String> getPublicIdSByCreatedAtBefore(LocalDateTime date){
+
+        return productImageRepository.findAllPublicIdByCreatedAtBefore(date);
     }
 }

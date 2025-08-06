@@ -5,6 +5,7 @@ import com.ngphthinh.flower.dto.response.ReportResponse;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,12 +32,12 @@ public class ReportService {
 
         Map<String, Object> params = getStringObjectMap(orderResponse);
 
-
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(orderResponse.getOrderDetailResponses());
         JasperPrint print = JasperFillManager.fillReport(jasperReport, params, dataSource);
 
         return ReportResponse.builder()
                 .reportData(JasperExportManager.exportReportToPdf(print))
+                .mediaType(MediaType.APPLICATION_PDF_VALUE)
                 .build();
     }
 

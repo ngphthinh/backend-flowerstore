@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-//@Builder
+@Builder
 public class StoreStatisticsResponse {
     private Long storeId;
     private String storeName;
@@ -40,5 +40,4 @@ public class StoreStatisticsResponse {
         this.averageOrderValue = averageOrderValue;
     }
 
-    // Uncomment if you want to use Builder pattern
 }

@@ -1,15 +1,18 @@
-package com.ngphthinh.flower.dto.response;
+package com.ngphthinh.flower.util;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReportResponse {
-    private byte[] reportData;
-    private String mediaType;
+public class DateRange {
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 }

@@ -1,10 +1,9 @@
 package com.ngphthinh.flower.serivce;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ngphthinh.flower.constant.Constant;
+import com.ngphthinh.flower.util.Constant;
 import com.ngphthinh.flower.dto.request.CreateOrderBaseRequest;
 import com.ngphthinh.flower.dto.request.CreateOrderRequest;
-import com.ngphthinh.flower.dto.request.DateRangeRequest;
 import com.ngphthinh.flower.dto.response.*;
 import com.ngphthinh.flower.entity.Order;
 import com.ngphthinh.flower.entity.Store;
@@ -18,9 +17,7 @@ import jakarta.validation.ConstraintViolation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.validation.Validator;
@@ -41,7 +38,6 @@ import java.util.stream.Stream;
 @Service
 public class OrderService {
 
-    private static final String ATTRIBUTE_ORDER_DATE = "orderDate";
     private static final Logger log = LogManager.getLogger(OrderService.class);
 
     private final StoreService storeService;
@@ -198,13 +194,6 @@ public class OrderService {
         }
     }
 
-    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
-    public List<OrderResponse> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(orderMapper::toOrderResponse).toList();
-
-    }
-
     private List<byte[]> buildImageBytes(List<MultipartFile> images) {
         return images.stream()
                 .map(image -> {
@@ -248,123 +237,6 @@ public class OrderService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public TotalPriceOrderResponse getTotalPriceBetweenDates(DateRangeRequest dateRangeRequest) {
-        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
-        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
-
-        if (startDate.isAfter(endDate)) {
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
-
-        BigDecimal totalPriceByDateBetween = orderRepository.sumTotalPriceByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
-        return TotalPriceOrderResponse.builder()
-                .totalPrice(totalPriceByDateBetween)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public TotalPriceOrderResponse getTotalPriceByDate(LocalDate date) {
-        LocalDateTime startDate = date.atStartOfDay();
-        LocalDateTime endDate = date.atTime(LocalTime.MAX);
-
-        BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
-                .sumTotalPriceByDateBetween(startDate, endDate)
-                .orElse(BigDecimal.ZERO);
-
-        return TotalPriceOrderResponse.builder()
-                .totalPrice(totalPriceByStoreIdAndOrderDateBetween)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-    }
-
-    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
-    public PagingResponse<OrderResponse> getOrderByBetweenDates(DateRangeRequest dateRangeRequest) {
-        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
-        LocalDateTime enDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
-
-        int size = dateRangeRequest.getSize();
-        int page = dateRangeRequest.getPage();
-
-        if (size < 1 || page < 1) {
-            throw new AppException(ErrorCode.INVALID_PAGINATION);
-        }
-
-        if (startDate.isAfter(enDate)) {
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
-
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(ATTRIBUTE_ORDER_DATE).descending());
-
-        var orderPage = orderRepository.findOrdersByOrderDateBetween(startDate, enDate, pageable);
-
-        List<OrderResponse> orderResponses = orderPage.getContent().stream()
-                .map(orderMapper::toOrderResponse)
-                .toList();
-
-        return PagingResponse.<OrderResponse>builder()
-                .content(orderResponses)
-                .totalPages(orderPage.getTotalPages())
-                .totalElements(orderPage.getTotalElements())
-                .page(page)
-                .size(size)
-                .build();
-    }
-
-
-    @PreAuthorize("hasAuthority('VIEW_INVOICE')")
-    public PagingResponse<OrderResponse> getAllOrderWithPaginate(int page, int size) {
-        if (page < 1 || size < 1) {
-            throw new AppException(ErrorCode.INVALID_PAGINATION);
-        }
-
-        int pageRaw = page - 1;
-
-        Pageable pageable = PageRequest.of(pageRaw, size, Sort.by(ATTRIBUTE_ORDER_DATE).descending());
-
-        var orderPage = orderRepository.findAll(pageable);
-
-        List<OrderResponse> orderResponses = orderPage.getContent().stream()
-                .map(orderMapper::toOrderResponse)
-                .toList();
-
-        return PagingResponse.<OrderResponse>builder()
-                .content(orderResponses)
-                .totalElements(orderPage.getTotalElements())
-                .totalPages(orderPage.getTotalPages())
-                .page(page)
-                .size(size)
-                .build();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public TotalPriceOrderResponse getTotalPriceByStoreIdAndDateRange(Long storeId, DateRangeRequest dateRangeRequest) {
-
-
-        if (!storeService.isStoreExist(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_FOUND, "id", storeId.toString());
-        }
-        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
-        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
-
-        if (startDate.isAfter(endDate)) {
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
-
-        BigDecimal totalPriceByStoreIdAndOrderDateBetween = orderRepository
-                .sumTotalPriceByStoreIdAndOrderDateBetween(storeId, startDate, endDate)
-                .orElse(BigDecimal.ZERO);
-
-        return TotalPriceOrderResponse.builder()
-                .totalPrice(totalPriceByStoreIdAndOrderDateBetween)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
     public TotalPriceOrderResponse getTotalPriceByStoreIdAndDate(Long storeId, LocalDate startDate, LocalDate endDate) {
 
         LocalDateTime startDateTime = startDate.atStartOfDay();
@@ -400,7 +272,7 @@ public class OrderService {
             LocalDateTime startDate = LocalDate.now().minusDays(7).atStartOfDay();
             LocalDateTime endDate = LocalDate.now().atTime(LocalTime.MAX);
 
-            totalByOrderDate = mapMissingDates(orderRepository.findTotalByOrderDate(startDate, endDate));//, startDate.toLocalDate(), endDate.toLocalDate());
+            totalByOrderDate = mapMissingDates(orderRepository.findTotalByOrderDate(startDate, endDate));
         } else if (stateStatisticsDay.equals("DAY_365")) {
             totalByOrderDate = mapMissingQuarter( orderRepository.findTotalByQuarter(LocalDateTime.now()));
         } else {
@@ -458,4 +330,28 @@ public class OrderService {
                 }
         ).toList();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderResponse> getAllOrderByDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        List<Order> orders = orderRepository.findAllByOrderDateBetween(startDateTime, endDateTime);
+
+        return orders.stream()
+                .map(order -> {
+                    List<OrderDetailResponse> orderDetailResponses = order.getOrderDetails().stream()
+                            .map(orderDetailMapper::toOrderDetailResponse)
+                            .toList();
+                    OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+                    orderResponse.setOrderDetailResponses(orderDetailResponses);
+                    return orderResponse;
+                })
+                .toList();
+    }
+
 }

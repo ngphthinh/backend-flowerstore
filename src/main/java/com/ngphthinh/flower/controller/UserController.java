@@ -44,16 +44,6 @@ public class UserController {
                 .build();
     }
 
-
-    @GetMapping("/{phone}")
-    public ApiResponse<UserResponse> getUserByPhone(@PathVariable String phone) {
-        return ApiResponse.<UserResponse>builder()
-                .code(ResponseCode.GET_USER_BY_PHONE.getCode())
-                .message(ResponseCode.GET_USER_BY_PHONE.getMessage())
-                .data(userService.getUserByPhoneNumber(phone))
-                .build();
-    }
-
     @PutMapping("/{phone}")
     public ApiResponse<UserResponse> updateUser(
             @PathVariable String phone,
@@ -74,15 +64,6 @@ public class UserController {
                 .data(userService.deleteUserByPhoneNumber(phone))
                 .build();
     }
-
-//    @PostMapping("/change-password")
-//    public ApiResponse<UserChangePasswordResponse> changePassword(@Valid @RequestBody UserChangePasswordRequest request) {
-//        return ApiResponse.<UserChangePasswordResponse>builder()
-//                .code(ResponseCode.CHANGE_PASSWORD.getCode())
-//                .message(ResponseCode.CHANGE_PASSWORD.getMessage())
-//                .data(userService.changePassword(request))
-//                .build();
-//    }
 
 
     @PutMapping("/profile/{phone}")

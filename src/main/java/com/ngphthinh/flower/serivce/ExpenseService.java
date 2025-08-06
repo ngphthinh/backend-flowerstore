@@ -1,7 +1,7 @@
 package com.ngphthinh.flower.serivce;
 
-import com.ngphthinh.flower.constant.Constant;
-import com.ngphthinh.flower.dto.request.DateRangeRequest;
+import com.ngphthinh.flower.enums.StateStatisticsDay;
+import com.ngphthinh.flower.util.Constant;
 import com.ngphthinh.flower.dto.request.ExpenseRequest;
 import com.ngphthinh.flower.dto.request.SumAmountExpenseByIdsRequest;
 import com.ngphthinh.flower.dto.response.*;
@@ -10,8 +10,9 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.ExpenseMapper;
 import com.ngphthinh.flower.repo.ExpenseRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.ngphthinh.flower.util.DateRange;
+import com.ngphthinh.flower.util.StatisticsUtil;
+import com.ngphthinh.flower.validator.PaginateValidator;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,6 @@ import java.util.stream.Stream;
 @Service
 public class ExpenseService {
 
-    private static final Logger log = LogManager.getLogger(ExpenseService.class);
     private final ExpenseRepository expenseRepository;
 
     private final ExpenseMapper expenseMapper;
@@ -47,10 +47,6 @@ public class ExpenseService {
         return expenseMapper.toExpenseResponse(expenseRepository.save(expense));
     }
 
-    public ExpenseResponse getExpenseById(Long id) {
-        Expense expense = getExpenseByIdEntity(id);
-        return expenseMapper.toExpenseResponse(expense);
-    }
 
     public ExpenseResponse updateExpense(Long id, ExpenseRequest expenseRequest) {
         Expense expense = getExpenseByIdEntity(id);
@@ -64,38 +60,15 @@ public class ExpenseService {
         return expenseMapper.toExpenseResponse(expense);
     }
 
-    public List<ExpenseResponse> getAllExpenses() {
-
-        return expenseRepository.findAll()
-                .stream()
-                .map(expenseMapper::toExpenseResponse)
-                .toList();
-    }
-
     public Expense getExpenseByIdEntity(Long id) {
         return expenseRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.EXPENSE_NOT_FOUND, "id", id.toString()));
     }
 
-    public TotalAmountExpenseResponse getTotalAmountExpenseBetweenDates(DateRangeRequest dateRangeRequest) {
-        LocalDateTime startDate = dateRangeRequest.getStartDate().atStartOfDay();
-        LocalDateTime endDate = dateRangeRequest.getEndDate().atTime(LocalTime.MAX);
-
-        if (startDate.isAfter(endDate)) {
-            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
-        }
-
-        BigDecimal totalAmountExpense = expenseRepository.sumAmountByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
-        return TotalAmountExpenseResponse.builder()
-                .totalAmount(totalAmountExpense)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-    }
 
     public PagingResponse<ExpenseResponse> getExpensesByFilter(Pageable pageable, LocalDate startDate, LocalDate endDate, String expenseType, String searchTerm) {
 
-        validatePaginate(pageable);
+        PaginateValidator.validatePaginate(pageable);
 
         validateDateRange(startDate, endDate);
         LocalDateTime startDateTime = Objects.nonNull(startDate) ? startDate.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0, 0);
@@ -127,19 +100,6 @@ public class ExpenseService {
 
     }
 
-    private void validatePaginate(Pageable pageable) {
-        int page = pageable.getPageNumber();
-        int size = pageable.getPageSize();
-        if (page < 0) {
-            throw new AppException(ErrorCode.INVALID_PAGE);
-        }
-
-        if (size < 1 || size > 60) {
-            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
-        }
-    }
-
-
     public TotalAmountExpenseResponse getTotalAmountByFilter(SumAmountExpenseByIdsRequest request) {
         List<Long> ids = request.getExpenseIds();
         if (ids == null || ids.isEmpty()) {
@@ -159,36 +119,15 @@ public class ExpenseService {
     }
 
     public TotalAmountExpenseResponse getTotalAmountExpenseByState(String stateStatisticsDay) {
-        LocalDateTime startDate;
-        LocalDateTime endDate;
 
-        switch (stateStatisticsDay) {
-            case "TODAY" -> {
-                startDate = LocalDate.now().atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_7" -> {
-                startDate = LocalDate.now().minusDays(7).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_30" -> {
-                startDate = LocalDate.now().minusDays(30).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            case "DAY_365" -> {
-                startDate = LocalDate.now().minusYears(1).atStartOfDay();
-                endDate = LocalDate.now().atTime(LocalTime.MAX);
-            }
-            default ->
-                    throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
-        }
+        DateRange dateRange = StatisticsUtil.getDateRange(stateStatisticsDay);
 
-        BigDecimal totalAmountExpense = expenseRepository.sumAmountByDateBetween(startDate, endDate).orElse(BigDecimal.ZERO);
+        BigDecimal totalAmountExpense = expenseRepository.sumAmountByDateBetween(dateRange.getStartDate(), dateRange.getEndDate()).orElse(BigDecimal.ZERO);
 
         return TotalAmountExpenseResponse.builder()
                 .totalAmount(totalAmountExpense)
-                .startDate(startDate)
-                .endDate(endDate)
+                .startDate(dateRange.getStartDate())
+                .endDate(dateRange.getEndDate())
                 .build();
     }
 
@@ -198,14 +137,16 @@ public class ExpenseService {
             throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);
         }
 
+        StateStatisticsDay range = StateStatisticsDay.valueOf(stateStatisticsDay);
+
         List<ExpenseStatisticsResponse> totalByExpenseDate;
 
-        if (stateStatisticsDay.equals("TODAY") || stateStatisticsDay.equals("DAY_7") || stateStatisticsDay.equals("DAY_30")) {
+        if (range.equals(StateStatisticsDay.TODAY) || range.equals(StateStatisticsDay.DAY_7) || range.equals(StateStatisticsDay.DAY_30)) {
             LocalDateTime startDate = LocalDate.now().minusDays(7).atStartOfDay();
             LocalDateTime endDate = LocalDate.now().atTime(LocalTime.MAX);
 
-            totalByExpenseDate = mapMissingDates(expenseRepository.findExpenseStatisticsByDate(startDate, endDate));//, startDate.toLocalDate(), endDate.toLocalDate());
-        } else if (stateStatisticsDay.equals("DAY_365")) {
+            totalByExpenseDate = mapMissingDates(expenseRepository.findExpenseStatisticsByDate(startDate, endDate));
+        } else if (range.equals(StateStatisticsDay.DAY_365)) {
             totalByExpenseDate = mapMissingQuarter( expenseRepository.findExpenseStatisticsQuarter(LocalDateTime.now()));
         } else {
             throw new AppException(ErrorCode.INVALID_STATE_STATISTICS_DAY, "stateStatisticsDay", stateStatisticsDay);

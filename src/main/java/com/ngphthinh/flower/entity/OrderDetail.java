@@ -26,7 +26,7 @@ public class OrderDetail {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne( fetch = FetchType.LAZY)
     @JoinColumn(name = "product_image_id")
     private ProductImage productImage;
 

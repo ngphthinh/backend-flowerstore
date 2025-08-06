@@ -1,11 +1,9 @@
 package com.ngphthinh.flower.serivce;
 
-import com.ngphthinh.flower.dto.request.AuthenticationRequest;
-import com.ngphthinh.flower.dto.request.IntrospectRequest;
-import com.ngphthinh.flower.dto.request.LogoutRequest;
-import com.ngphthinh.flower.dto.request.RefreshTokenRequest;
+import com.ngphthinh.flower.dto.request.*;
 import com.ngphthinh.flower.dto.response.AuthenticationResponse;
 import com.ngphthinh.flower.dto.response.IntrospectResponse;
+import com.ngphthinh.flower.dto.response.UserChangePasswordResponse;
 import com.ngphthinh.flower.entity.Permission;
 import com.ngphthinh.flower.entity.Role;
 import com.ngphthinh.flower.entity.User;
@@ -18,7 +16,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,24 +38,26 @@ public class AuthenticationService {
 
     private final RefreshTokenService refreshTokenService;
 
+    private final ChangePasswordService changePasswordService;
+
     @Value("${jwt.valid-duration}")
     private Long VALID_DURATION;
 
     @Value("${jwt.secret-key}")
     private String SECRET_KEY;
 
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenBlackListService tokenBlackListService, RefreshTokenService refreshTokenService) {
+    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenBlackListService tokenBlackListService, RefreshTokenService refreshTokenService, ChangePasswordService changePasswordService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenBlackListService = tokenBlackListService;
         this.refreshTokenService = refreshTokenService;
+        this.changePasswordService = changePasswordService;
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "phoneNumber", request.getPhoneNumber()));
 
-//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12)
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
@@ -112,7 +112,6 @@ public class AuthenticationService {
 
         try {
             verifyToken(token);
-
         } catch (AppException e) {
             isValid = false;
         }
@@ -141,6 +140,17 @@ public class AuthenticationService {
             String jitToken = signedJWT.getJWTClaimsSet().getJWTID();
             if (tokenBlackListService.isBlacklisted(jitToken)) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            // check iat time
+            String phoneNumber = signedJWT.getJWTClaimsSet().getSubject();
+
+            Date iatTime = signedJWT.getJWTClaimsSet().getIssueTime();
+            if (changePasswordService.isTokenInvalidationTimestampExists(phoneNumber)) {
+                long changePasswordDate = Long.parseLong(changePasswordService.getTokenInvalidationTimestamp(phoneNumber));
+                if (changePasswordDate > iatTime.toInstant().toEpochMilli()) {
+                    throw new AppException(ErrorCode.UNAUTHENTICATED);
+                }
             }
             return signedJWT;
         } catch (JOSEException | ParseException e) {
@@ -213,5 +223,25 @@ public class AuthenticationService {
         return "";
     }
 
+    @PreAuthorize("#request.phoneNumber == authentication.name")
+    public UserChangePasswordResponse changePassword(UserChangePasswordRequest request) {
+        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "phoneNumber", request.getPhoneNumber()));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.VERIFY_PASSWORD_FAILED);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        // save changed password date to invalidate old tokens
+        long changedPasswordDate = new Date().toInstant().toEpochMilli();
+        changePasswordService.saveTokenInvalidationTimestamp(user.getPhoneNumber(), String.valueOf(changedPasswordDate));
+
+        return UserChangePasswordResponse.builder()
+                .success(true)
+                .build();
+
+    }
 
 }

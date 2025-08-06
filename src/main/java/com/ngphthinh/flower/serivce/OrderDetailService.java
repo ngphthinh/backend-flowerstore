@@ -13,7 +13,6 @@ import com.ngphthinh.flower.repo.OrderDetailRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.io.IOException;
 import java.util.ArrayList;

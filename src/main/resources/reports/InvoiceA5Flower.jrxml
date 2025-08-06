@@ -280,7 +280,7 @@
                     <textElement textAlignment="Center" verticalAlignment="Middle">
                         <font fontName="ArialVietnamese"/>
                     </textElement>
-                    <textFieldExpression><![CDATA[$F{price}]]></textFieldExpression>
+                    <textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.##").format($F{price})]]></textFieldExpression>
                 </textField>
                 <textField>
                     <reportElement x="152" y="0" width="76" height="50" uuid="763bb9d5-f07f-42ea-9fc6-cdd5cafed2bc">
@@ -312,7 +312,7 @@
                     <textElement textAlignment="Center" verticalAlignment="Middle">
                         <font fontName="ArialVietnamese"/>
                     </textElement>
-                    <textFieldExpression><![CDATA[$F{subtotal}]]></textFieldExpression>
+                    <textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.##").format($F{subtotal})]]></textFieldExpression>
                 </textField>
                 <image>
                     <reportElement x="314" y="1" width="55" height="50" uuid="55bd3c13-1c9d-4dc0-ba6f-44558ee622e2">

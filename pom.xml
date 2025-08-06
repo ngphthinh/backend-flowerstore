@@ -114,6 +114,18 @@
             <artifactId>arial-vietnamese</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
+        <!-- Apache POI - For .xlsx (Excel 2007+) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
+        </dependency>
     </dependencies>
 
     <build>

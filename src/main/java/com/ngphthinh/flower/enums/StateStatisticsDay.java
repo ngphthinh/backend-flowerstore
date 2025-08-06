@@ -4,5 +4,5 @@ public enum StateStatisticsDay {
     TODAY,
     DAY_7,
     DAY_30,
-    YEAR_1,
+    DAY_365,
 }

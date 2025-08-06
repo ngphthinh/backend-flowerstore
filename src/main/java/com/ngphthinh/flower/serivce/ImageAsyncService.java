@@ -5,8 +5,6 @@ import com.ngphthinh.flower.entity.ProductImage;
 import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.repo.OrderDetailRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ImageAsyncService {
 
-    private static final Logger log = LogManager.getLogger(ImageAsyncService.class);
     private final OrderDetailRepository orderDetailRepository;
     private final ProductImageService productImageService;
 

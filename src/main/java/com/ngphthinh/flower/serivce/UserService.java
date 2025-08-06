@@ -12,11 +12,9 @@ import com.ngphthinh.flower.exception.AppException;
 import com.ngphthinh.flower.exception.ErrorCode;
 import com.ngphthinh.flower.mapper.UserMapper;
 import com.ngphthinh.flower.repo.UserRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.ngphthinh.flower.validator.PaginateValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,10 +25,9 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Value("${flower.default.password}")
+    @Value("${flower.default.user-password}")
     private String PASSWORD_DEFAULT;
     private static final String USER_ROLE = "USER";
-    private static final Logger log = LogManager.getLogger(UserService.class);
 
     private static final String PHONE_KEY = "phoneNumber";
 
@@ -78,7 +75,7 @@ public class UserService {
     @PreAuthorize("hasRole('ADMIN')")
     public PagingResponse<UserResponse> getAllUsers(Pageable pageable, String roleName, String phoneNumber) {
 
-        validatePaginate(pageable);
+        PaginateValidator.validatePaginate(pageable);
 
         if (roleName != null && roleName.isBlank()) {
             roleName = null;
@@ -127,22 +124,6 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-//    public UserChangePasswordResponse changePassword(UserChangePasswordRequest request) {
-//        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
-//                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, request.getPhoneNumber()));
-//
-//        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-//            throw new AppException(ErrorCode.VERIFY_PASSWORD_FAILED);
-//        }
-//
-//        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-//        userRepository.save(user);
-//
-//        return UserChangePasswordResponse.builder()
-//                .success(true)
-//                .build();
-//    }
-
     public UserResponse getProfile() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String phoneNumber = authentication.getName();
@@ -151,15 +132,8 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse getUserByPhoneNumber(String phoneNumber) {
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, phoneNumber));
-        return userMapper.toUserResponse(user);
-    }
-
     @PreAuthorize("#phone == authentication.name")
-    public UserResponse updateProfile(String phone, UserUpdateRequest request){
+    public UserResponse updateProfile(String phone, UserUpdateRequest request) {
         User user = userRepository.findByPhoneNumber(phone)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, PHONE_KEY, phone));
 
@@ -168,15 +142,5 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    private void validatePaginate(Pageable pageable) {
-        int page = pageable.getPageNumber();
-        int size = pageable.getPageSize();
-        if (page < 0) {
-            throw new AppException(ErrorCode.INVALID_PAGE);
-        }
 
-        if (size < 1 || size > 60) {
-            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
-        }
-    }
 }

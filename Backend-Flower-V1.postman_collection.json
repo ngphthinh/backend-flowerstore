@@ -1,0 +1,1104 @@
+{
+	"info": {
+		"_postman_id": "25f5e76e-7717-4924-a6fc-329e3b38d7ac",
+		"name": "Backend-Flower-V1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45703088",
+		"_collection_link": "https://ngphthinh-6813731.postman.co/workspace/ngphthinh's-Workspace~c238d09f-146f-4aee-8f66-274d64bb9b4a/collection/45703088-25f5e76e-7717-4924-a6fc-329e3b38d7ac?action=share&source=collection_link&creator=45703088"
+	},
+	"item": [
+		{
+			"name": "Order",
+			"item": [
+				{
+					"name": "Create order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product",
+									"value": "{\"name\": \"Trà đào\", \"price\": 30000}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/MyLove/z5083916571759_005_48acf4b395a2115889722b3ab6c4d893.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/order",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get order by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product",
+									"value": "{\"name\": \"Trà đào\", \"price\": 30000}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/MyLove/z5083916571759_005_48acf4b395a2115889722b3ab6c4d893.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/order/1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"order",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get order by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "product",
+											"value": "{\"name\": \"Trà đào\", \"price\": 30000}",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/D:/MyLove/z5083916571759_005_48acf4b395a2115889722b3ab6c4d893.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/v1/order/18",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"order",
+										"18"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Vary",
+									"value": "Access-Control-Request-Method"
+								},
+								{
+									"key": "Vary",
+									"value": "Access-Control-Request-Headers"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Jul 2025 04:17:44 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"message\": \"Order retrieved successfully\",\n    \"data\": {\n        \"orderId\": 18,\n        \"customerName\": \"Nguyễn Văn A\",\n        \"deliveryMethod\": \"PICKUP\",\n        \"orderDate\": \"2025-07-14T15:30:00\",\n        \"note\": \"Giao hàng trước 5 giờ chiều\",\n        \"totalPrice\": 150000,\n        \"storeName\": \"Shop 3\",\n        \"orderDetailResponses\": [\n            {\n                \"id\": 44,\n                \"productName\": \"Cà phê sữa\",\n                \"price\": 45000,\n                \"subtotal\": 90000,\n                \"quantity\": 2,\n                \"url\": \"https://res.cloudinary.com/dg6sdy9tk/image/upload/v1753093977/flower/ksywlr8surwfa2rf0ssu.jpg\"\n            },\n            {\n                \"id\": 45,\n                \"productName\": \"Bánh ngọt\",\n                \"price\": 30000,\n                \"subtotal\": 30000,\n                \"quantity\": 1\n            },\n            {\n                \"id\": 46,\n                \"productName\": \"Bánh mì\",\n                \"price\": 30000,\n                \"subtotal\": 30000,\n                \"quantity\": 1\n            }\n        ]\n    },\n    \"datetime\": \"2025-07-25T11:17:44.7711799\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get all order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/order",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete order by id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product",
+									"value": "{\"name\": \"Trà đào\", \"price\": 30000}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/MyLove/z5083916571759_005_48acf4b395a2115889722b3ab6c4d893.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/order/2",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"order",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all invoices",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMzExMTExMTEyIiwiZXhwIjoxNzUzODU4MTkxLCJpYXQiOjE3NTM4NTQ1OTEsImp0aSI6ImU5MDlkOWNiLTg5NjAtNDNiOC1hYjYwLTkxYTIwNGVhZmEzYyIsInNjb3BlIjoiUk9MRV9VU0VSIFZJRVdfSU5WT0lDRSBDUkVBVEVfSU5WT0lDRSBWSUVXX1NUT1JFIn0.i04G7QPfzrX3C_N0VQD_lfL9u2_7LIC0afM4TA5wTDZBWvNbE8t6GpJ9HwyIU9BjYlXKOJfkrG9lH88ZNCMZKg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/order/invoice?page=0&size=10&sort=orderDate,desc&storeId=1&startDate=2025-07-29&endDate=2025-07-30",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"order",
+								"invoice"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "orderDate,desc"
+								},
+								{
+									"key": "storeId",
+									"value": "1"
+								},
+								{
+									"key": "startDate",
+									"value": "2025-07-29"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-07-30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create order base",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{       \r\n    \"storeId\": 1,\r\n    \"productName\": \"Sản phẩm 1\",\r\n    \"price\": 20000,\r\n    \"note\": \"Đây là api tạo hóa đơn đơn giản\",\r\n    \"quantity\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/order/product",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"order",
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get total price from start date to end date",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"2025-07-10T23:59:59\",\r\n    \"endDate\":\"2025-07-10T23:00:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/order/total",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"order",
+								"total"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get order by date between",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get total price by date",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get total price by date and store id",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get total price by date and date between",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Search",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "stateStatisticsDay",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/order/statistics/price?stateStatisticsDay=TODAY",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"order",
+								"statistics",
+								"price"
+							],
+							"query": [
+								{
+									"key": "stateStatisticsDay",
+									"value": "TODAY"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Store",
+			"item": [
+				{
+					"name": "Get store by id",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get all stores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Shop 1\",\r\n    \"address\": \"Address 1 of shop 1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/store",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update store",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Shop 3\",\r\n    \"address\": \"Address 3 of shop 3\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/store/",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"store",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete store by id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Shop 1\",\r\n    \"address\": \"Address 1 of shop 1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/store/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"store",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "statistics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMDAwMDAwMDAwIiwiZXhwIjoxNzU0MDI4Mzk4LCJpYXQiOjE3NTQwMjExOTgsImp0aSI6IjIzZDc4NWRmLWY4MjYtNDczYi04ODMyLWUyYWJhMDcwMThmMSIsInNjb3BlIjoiUk9MRV9BRE1JTiBWSUVXX1NUT1JFIENSRUFURV9JTlZPSUNFIERFTEVURV9JTlZPSUNFIFZJRVdfSU5WT0lDRSJ9.QjhxSvP1QiJXB0txDFdSgAkWY6yHDoKtTf_FmKOSCcnzbtxKpGnLREwjpCS7IkipwkUmDuiKcI3Q3yJmVY0_zg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/store/statistics?stateStatisticsDay=TODAY",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"store",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "stateStatisticsDay",
+									"value": "TODAY"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expense",
+			"item": [
+				{
+					"name": "Create expense",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMDAwMDAwMDAwIiwiZXhwIjoxNzUzNzYyNDMxLCJpYXQiOjE3NTM3NTg4MzEsImp0aSI6IjJkOWU3ODk2LTJlMmQtNDhiZC04NWQ5LTdhZDk0MmIzMjMwNCIsInNjb3BlIjoiUk9MRV9BRE1JTiBWSUVXX0lOVk9JQ0UgREVMRVRFX0lOVk9JQ0UgQ1JFQVRFX0lOVk9JQ0UifQ.1ZjB4bia8nJGbtnW95XfCked5Qr9ahq1kEQxo3lwcyMydxbG7x5c-kSTjPP1QfswmqliYA_osO4FElV3RU5anw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Expense 1234\",\r\n    \"amount\": 200000,\r\n    \"date\": \"2025-04-18T19:20:00\"\r\n    \"expenseType\": \"Salary\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/expense",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"expense"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete expense by id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Expense 1\",\r\n    \"amount\": 200000,\r\n    \"date\": \"2025-07-18T19:20:00\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/expense/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"expense",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update expense by",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Expense update 21\",\r\n    \"amount\": 999\r\n    // \"date\": \"2000-07-18T19:20:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/expense/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"expense",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "statistics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMDAwMDAwMDAwIiwiZXhwIjoxNzU0MTE0NTY0LCJpYXQiOjE3NTQxMDczNjQsImp0aSI6ImExNTRmZjFjLTg5NGItNGY4ZC05YzNmLWQ3OTdiNzBmYjUzZCIsInNjb3BlIjoiUk9MRV9BRE1JTiBERUxFVEVfSU5WT0lDRSBWSUVXX0lOVk9JQ0UgVklFV19TVE9SRSBDUkVBVEVfSU5WT0lDRSJ9.-uL6vcxdvLABS-QplQV8dYySy2BF_hyh8G1u1lvAU7M-b03F0uNd4FaBvqT3faYYMCouP0N8FF4jZVvCE19wdw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/expense/statistics?stateStatisticsDay=DAY_365",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"expense",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "stateStatisticsDay",
+									"value": "DAY_365"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Get all user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phoneNumber\": \"0123456789\",\r\n    \"storeId\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get user by phone number",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/user/012346789",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"012346789"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update user",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullName\": \"Test update fullname time 1\",\r\n    \"role\":\"ADMIN\",\r\n    \"storeId\":1 \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/user/0123456789",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"0123456789"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullName\": \"Test update fullname time 1\",\r\n    \"role\":\"ADMIN\",\r\n    \"storeId\":1 \r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/user/0123456789",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"0123456789"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get profile",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Introspect",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"accessToken\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMDAwMDAwMDAwIiwiZXhwIjoxNzU0NDA5MTkzLCJpYXQiOjE3NTQ0MDE5OTMsImp0aSI6ImVmNjI1OTQzLThlOTktNGEzZi04ZmEzLTAwMjhkNDY4ODA2MiIsInNjb3BlIjoiUk9MRV9BRE1JTiBERUxFVEVfSU5WT0lDRSBDUkVBVEVfSU5WT0lDRSBWSUVXX1NUT1JFIFZJRVdfSU5WT0lDRSJ9.-eIkbpvBfEKMGVwvqzI2EOKu6DiKhIIWv45wN2n_zosK8U_uqXASbjUUZoanzmAyvTjzk2LfJ9GAy0V8H1GZUw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/introspect",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"introspect"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phoneNumber\": \"0000000000\",\r\n    \"password\": \"Admin@1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"assessToken\": \"\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"88b5fb25-e744-40e5-ac90-6737f01c0f34\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMDAwMDAwMDAwIiwiZXhwIjoxNzU0NDA5NTUxLCJpYXQiOjE3NTQ0MDIzNTEsImp0aSI6IjYxYjczNDdlLWUyNTItNDdiOC1hMGI1LWI2ZTg3YWJkOWEzYiIsInNjb3BlIjoiUk9MRV9BRE1JTiBERUxFVEVfSU5WT0lDRSBDUkVBVEVfSU5WT0lDRSBWSUVXX1NUT1JFIFZJRVdfSU5WT0lDRSJ9.c6A6DHsRMSItDNPHTrgbU17LprffCqxLzgi-P0XP5g61CfHQtguIWlmFsAZRoJBNsb1uHOiz-3XdpGU9HwgMZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phoneNumber\": \"0000000000\",\r\n    \"oldPassword\":\"Admin@1234\",\r\n    \"newPassword\":\"Admin@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/change-password",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Export",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Export excel",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJuZ3BodGhpbmgiLCJzdWIiOiIwMDAwMDAwMDAwIiwiZXhwIjoxNzU0MzI5ODg0LCJpYXQiOjE3NTQzMjI2ODQsImp0aSI6IjZiMzY2Nzk3LTY1NzktNGZjYS04ZGFhLTFkNDE0OGQxNTcxOCIsInNjb3BlIjoiUk9MRV9BRE1JTiBERUxFVEVfSU5WT0lDRSBWSUVXX0lOVk9JQ0UgQ1JFQVRFX0lOVk9JQ0UgVklFV19TVE9SRSJ9.p58Y0W6CkYG1cUyYoWhd4lp4-fMW7a6gRPSX1A0LkBSuXhS0IlKP00xQeUCpzEVtGwok6_HV6euAnuiLuFpE0Q",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/report/invoice-to-excel?startDate=2020-01-01&endDate=2026-01-01",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"report",
+						"invoice-to-excel"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "2020-01-01"
+						},
+						{
+							"key": "endDate",
+							"value": "2026-01-01"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "http://localhost:8080",
+			"type": "default"
+		}
+	]
+}

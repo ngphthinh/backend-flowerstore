@@ -44,7 +44,6 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(authorize ->
                 authorize.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/report/**").permitAll()
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole(ROLE_ADMIN)
                         .anyRequest().authenticated()
         );

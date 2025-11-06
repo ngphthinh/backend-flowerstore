@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ngphthinh.flower</groupId>
     <artifactId>backend-flower-shop</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>backend-flower-shop</name>
     <description>backend-flower-shop</description>
     <url/>
